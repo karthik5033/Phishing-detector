@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.analysis import AnalysisRequest, AnalysisResponse, RiskLevel
 from app.services.inference import get_inference_service, InferenceService
 from app.services.temporal import analyze_temporal_risk
+from app.services.impersonation import analyze_impersonation
 import hashlib
 import uuid
 
@@ -40,7 +41,18 @@ async def analyze_message(
             
         if temporal_warning:
             explanation += f" {temporal_warning}"
-            
+
+        # Impersonation Analysis (Module 3)
+        imp_risk_add, imp_warning = analyze_impersonation(request.page_title, request.url)
+        max_score = min(max_score + imp_risk_add, 1.0)
+        
+        # If impersonation detected, force High Risk
+        if imp_risk_add > 0:
+             risk_lvl = RiskLevel.HIGH_RISK
+             explanation = imp_warning # Override explanation with the most critical finding
+        else:
+             risk_lvl = get_risk_level(max_score)
+
         return AnalysisResponse(
             max_risk_score=max_score,
             risk_level=risk_lvl,

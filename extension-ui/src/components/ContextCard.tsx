@@ -34,7 +34,10 @@ export function ContextCard({ detailed = false }: { detailed?: boolean }) {
                // Cache miss? Trigger fresh analysis
                chrome.runtime.sendMessage({
                   type: 'CHECK_RISK',
-                  payload: { url: tab.url }
+                  payload: { 
+                    url: tab.url,
+                    title: tab.title // Send page title for Impersonation Check (Module 3)
+                  }
                }, (scanResponse) => {
                   if (scanResponse?.success) {
                       setRiskData(scanResponse.data);
