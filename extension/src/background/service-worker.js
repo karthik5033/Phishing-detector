@@ -2,7 +2,15 @@ import { updateBaseline, getBehavioralMultiplier } from './baseline.js';
 
 const API_BASE_URL = "http://localhost:8000/api/v1";
 
-// ... (sanitizeURL remains same)
+// Utility to sanitize URLs (remove query params)
+function sanitizeURL(url) {
+    try {
+        const u = new URL(url);
+        return `${u.protocol}//${u.hostname}${u.pathname}`;
+    } catch (e) {
+        return url;
+    }
+}
 
 async function handleRiskCheck(payload, sendResponse) {
     const { text, url } = payload;
