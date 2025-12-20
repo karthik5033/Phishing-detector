@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import analysis, events, stats
 
 from app import models
 from app.database import engine
+from app.routes import analysis, events, stats, chat
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -24,6 +24,7 @@ app.add_middleware(
 app.include_router(analysis.router)
 app.include_router(events.router)
 app.include_router(stats.router)
+app.include_router(chat.router)
 
 @app.get("/health")
 async def health_check():

@@ -76,3 +76,40 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         "recent_interventions": recent_data,
         "activity_trend": trend_data
     }
+
+@router.get("/activity", response_model=List[Dict[str, Any]])
+async def get_activity_log(
+    limit: int = 50, 
+    offset: int = 0, 
+    db: Session = Depends(get_db)
+):
+    scans = db.query(ScanResult).order_by(
+        ScanResult.timestamp.desc()
+    ).offset(offset).limit(limit).all()
+
+    activity_log = []
+    for s in scans:
+        # Infer category from explanation or risk
+        category = "General"
+        explanation = (s.explanation or "").lower()
+        
+        if "impersonation" in explanation or "typosquatting" in explanation or "homoglyph" in explanation:
+            category = "Phishing"
+        elif "urgency" in explanation or "social engineering" in explanation:
+            category = "Social Eng."
+        elif s.risk_score > 0.7:
+            category = "Critical"
+        elif s.risk_score < 0.1:
+            category = "Safe"
+
+        activity_log.append({
+            "id": s.id,
+            "domain": s.domain,
+            "timestamp": f"{s.timestamp.isoformat()}Z" if s.timestamp else datetime.utcnow().isoformat() + "Z",
+            "risk_score": s.risk_score,
+            "risk_level": s.risk_level,
+            "status": "BLOCKED" if s.risk_score > 0.8 else ("WARNED" if s.risk_score > 0.5 else "SAFE"),
+            "category": category
+        })
+    
+    return activity_log
