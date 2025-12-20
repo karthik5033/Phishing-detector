@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Switch } from "@/components/ui/switch"; // We'll implement a simple switch inline to avoid complex deps
+
 
 function SimpleSwitch({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (c: boolean) => void }) {
     return (
@@ -54,7 +54,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between pt-2">
               <div>
                   <h4 className="font-medium">Auto-Block High Risk</h4>
-                  <p className="text-sm text-muted-foreground">Automatically prevent loading of sites with >90% risk score.</p>
+                  <p className="text-sm text-muted-foreground">Automatically prevent loading of sites with &gt;90% risk score.</p>
               </div>
               <SimpleSwitch checked={autoBlock} onCheckedChange={setAutoBlock} />
           </div>

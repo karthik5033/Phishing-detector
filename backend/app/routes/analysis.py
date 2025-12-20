@@ -1,3 +1,8 @@
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import ScanResult
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.analysis import AnalysisRequest, AnalysisResponse, RiskLevel
 from app.services.inference import get_inference_service, InferenceService
@@ -18,7 +23,8 @@ def get_risk_level(score: float) -> RiskLevel:
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_message(
     request: AnalysisRequest, 
-    service: InferenceService = Depends(get_inference_service)
+    service: InferenceService = Depends(get_inference_service),
+    db: Session = Depends(get_db)
 ):
     try:
         # Note: We do NOT persist request.text or request.url
@@ -52,6 +58,26 @@ async def analyze_message(
              explanation = imp_warning # Override explanation with the most critical finding
         else:
              risk_lvl = get_risk_level(max_score)
+
+        # PERSISTENCE: Save result to DB
+        # Extract domain safely
+        domain = "unknown"
+        if request.url:
+            try:
+                parsed = urlparse(request.url)
+                domain = parsed.netloc or request.url[:50]
+            except:
+                pass
+
+        new_scan = ScanResult(
+            url=request.url,
+            domain=domain,
+            risk_score=max_score,
+            risk_level=risk_lvl.name,
+            explanation=explanation
+        )
+        db.add(new_scan)
+        db.commit()
 
         return AnalysisResponse(
             max_risk_score=max_score,

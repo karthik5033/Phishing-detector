@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Dependencies
+node_modules
+__pycache__
+.venv
+venv
+bin
+obj
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode
+.idea
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.swp
+
+# Build
+dist
+build
+.next
+out
