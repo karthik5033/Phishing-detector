@@ -4,8 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import models
 from app.database import engine
 from app.routes import analysis, events, stats, chat
+from app.services.telemetry import start_telemetry_engine
 
 models.Base.metadata.create_all(bind=engine)
+
+# Start background shadow telemetry
+start_telemetry_engine()
 
 app = FastAPI(
     title="SecureSentinel API",

@@ -1,4 +1,4 @@
-import { updateBaseline, getBehavioralMultiplier } from './baseline.js';
+import { updateBaseline, analyzeBehavior } from './baseline.js';
 
 const API_BASE_URL = "http://localhost:8000/api/v1";
 
@@ -15,10 +15,9 @@ function sanitizeURL(url) {
 async function handleRiskCheck(payload, sendResponse) {
     const { text, url } = payload;
     const sanitizedUrl = url ? sanitizeURL(url) : null;
+    const hostname = url ? new URL(url).hostname : null;
     
-    // 1. Update User Baseline (this is an event)
-    await updateBaseline();
-
+    // 1. Check Cache
     if (sanitizedUrl) {
          const cached = await chrome.storage.local.get(sanitizedUrl);
          if (cached[sanitizedUrl]) {
@@ -28,12 +27,12 @@ async function handleRiskCheck(payload, sendResponse) {
     }
 
     try {
-        // 2. Get Global Risk from Backend (includes Temporal Module)
+        // 2. Get Global Risk from Backend
         const now = new Date();
         const requestBody = {
             text: text || url,
             url: sanitizedUrl,
-            page_title: payload.title || null, // Pass title for Module 3
+            page_title: payload.title || null,
             local_hour: now.getHours(),
             day_of_week: (now.getDay() + 6) % 7 
         };
@@ -47,15 +46,21 @@ async function handleRiskCheck(payload, sendResponse) {
         if (!response.ok) throw new Error(`API error: ${response.status}`);
         let data = await response.json();
 
-        // 3. Apply Local Behavioral Multiplier
-        const localMultiplier = await getBehavioralMultiplier();
-        if (localMultiplier > 1.0) {
-            console.log(`[Risk] Applying Local Anomaly Multiplier: ${localMultiplier}x`);
-            data.max_risk_score = Math.min(data.max_risk_score * localMultiplier, 1.0);
-            
-            // Append local warning
-            if (data.explanation) {
-                data.explanation += " (Unusual activity pattern for you)";
+        // 3. Apply Local Behavioral Analysis (if interaction data available)
+        // Note: For link scans, we might not have interaction data yet, 
+        // but for active tab checks we might.
+        if (hostname) {
+            const behavioralResult = await analyzeBehavior(hostname, payload.signals || {});
+            if (behavioralResult.score > 0) {
+                console.log(`[Risk] Behavioral Anomaly detected: +${behavioralResult.score}`);
+                data.max_risk_score = Math.min(data.max_risk_score + behavioralResult.score, 1.0);
+                
+                // Explanation Engine Integration
+                if (behavioralResult.reasons.length > 0) {
+                    const localReasons = behavioralResult.reasons.map(r => r.detail).join(" ");
+                    data.explanation = (data.explanation || "") + " | [Local Behavior] " + localReasons;
+                    data.behavioral_reasons = behavioralResult.reasons; // Pass structured reasons for UI
+                }
             }
         }
 
@@ -67,7 +72,7 @@ async function handleRiskCheck(payload, sendResponse) {
 
         sendResponse({ success: true, data });
     } catch (error) {
-        console.error("[SecureSentinel] Backend unreachable:", error);
+        console.error("[SecureSentinel] Communication failed:", error);
         sendResponse({ success: false, error: error.message });
     }
 }
@@ -78,6 +83,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "CHECK_RISK") {
         handleRiskCheck(message.payload, sendResponse);
         return true; 
+    }
+
+    if (message.type === "BEHAVIORAL_SIGNAL") {
+        const { hostname, ...signals } = message.payload;
+        updateBaseline(hostname, signals).then(() => {
+            console.log(`[Baseline] Signal recorded for ${hostname}`);
+        });
+        return false; // No response needed
     }
 
     if (message.type === "GET_CACHED_RESULT") {

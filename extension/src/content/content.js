@@ -1,13 +1,59 @@
 /**
  * SecureSentinel Content Script
- * Observes DOM changes and injects risk badges.
+ * Observes DOM changes, injects risk badges, and collects behavioral signals.
  */
 
 console.log("[SecureSentinel] Content script active on:", window.location.href);
 
+const startTime = Date.now();
+let firstInteractionDone = false;
+
 /**
- * Injects a risk badge next to an element
- * Uses Shadow DOM to isolate styles
+ * Signal Collection: Detect interactions and anomalies
+ */
+function reportSignal(type, extra = {}) {
+    const timeSinceLoad = Date.now() - startTime;
+    chrome.runtime.sendMessage({
+        type: "BEHAVIORAL_SIGNAL",
+        payload: {
+            hostname: window.location.hostname,
+            timeToInteraction: timeSinceLoad,
+            signalType: type,
+            ...extra
+        }
+    });
+}
+
+// 1. Detect Form Interactions
+document.addEventListener("focus", (e) => {
+    if (firstInteractionDone) return;
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        firstInteractionDone = true;
+        reportSignal("FORM_FOCUS", { tagName: e.target.tagName });
+    }
+}, true);
+
+// 2. Detect Popups/Overlays
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) { // Element node
+                const style = window.getComputedStyle(node);
+                const isOverlay = style.position === "fixed" || style.position === "absolute";
+                const isHighZ = parseInt(style.zIndex) > 100;
+                const hasInput = node.querySelector("input, textarea");
+
+                if (isOverlay && isHighZ && hasInput) {
+                    reportSignal("POPUP_DETECTED", { popupDetected: true });
+                }
+            }
+        });
+    });
+});
+observer.observe(document.body, { childList: true, subtree: true });
+
+/**
+ * UI: Risk Badge Injection
  */
 function injectBadge(element, score) {
     if (element.dataset.sentinelChecked === "injected") return;
@@ -55,26 +101,17 @@ function injectBadge(element, score) {
     <div class="badge" title="SecureSentinel: ${label} (${Math.round(score * 100)}%)"></div>
   `;
 
-    // Try to find the title element inside the link to append next to
     const titleElement = element.querySelector("h3, .title, [class*='title']") || element;
-    
-    // If we found a specific title element, append to it so it stays with the text
-    // Otherwise append to the anchor itself
     if (titleElement !== element) {
-        titleElement.style.display = "inline"; // Ensure title doesn't force block to keep badge on same line
+        titleElement.style.display = "inline";
         titleElement.appendChild(container);
     } else {
         element.appendChild(container);
     }
-    
-    console.log(`[SecureSentinel] Badge injected inline for: ${element.hostname}`);
 }
 
 function scanLinks() {
-    // Target common search result link patterns
     const links = document.querySelectorAll("a[href^='http']:not([data-sentinel-checked])");
-    if (links.length > 0) console.log(`[SecureSentinel] Scanning ${links.length} potential triggers...`);
-
     links.forEach(link => {
         const url = link.href;
         if (url.includes(window.location.hostname) || url.length > 300) {
@@ -86,26 +123,17 @@ function scanLinks() {
             type: "CHECK_RISK",
             payload: { url }
         }, (response) => {
-            if (chrome.runtime.lastError) {
-                console.error("[SecureSentinel] Communication Error:", chrome.runtime.lastError.message);
-                return;
-            }
-            
+            if (chrome.runtime.lastError) return;
             if (response && response.success) {
-                console.log("[SecureSentinel] Analysis received for:", url);
                 injectBadge(link, response.data.max_risk_score);
-            } else {
-                console.warn("[SecureSentinel] Analysis failed for:", url, response?.error);
             }
         });
     });
 }
 
-// Aggressive initial scans
 [500, 1500, 3000].forEach(ms => setTimeout(scanLinks, ms));
-
-const observer = new MutationObserver(() => {
+const linkObserver = new MutationObserver(() => {
     if (window.scanTimeout) clearTimeout(window.scanTimeout);
     window.scanTimeout = setTimeout(scanLinks, 300);
 });
-observer.observe(document.body, { childList: true, subtree: true });
+linkObserver.observe(document.body, { childList: true, subtree: true });

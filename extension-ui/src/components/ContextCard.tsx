@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, AlertTriangle, CheckCircle, Search } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, Search, UserCheck, Timer, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface BehavioralReason {
+  id: string;
+  desc: string;
+  detail: string;
+}
 
 interface RiskData {
   max_risk_score: number;
   detections: Record<string, any>;
+  explanation?: string;
+  behavioral_reasons?: BehavioralReason[];
 }
 
 export function ContextCard({ detailed = false }: { detailed?: boolean }) {
@@ -36,7 +44,7 @@ export function ContextCard({ detailed = false }: { detailed?: boolean }) {
                   type: 'CHECK_RISK',
                   payload: { 
                     url: tab.url,
-                    title: tab.title // Send page title for Impersonation Check (Module 3)
+                    title: tab.title 
                   }
                }, (scanResponse) => {
                   if (scanResponse?.success) {
@@ -52,7 +60,17 @@ export function ContextCard({ detailed = false }: { detailed?: boolean }) {
         // Dev Mock
         setTimeout(() => {
             setCurrentUrl('example-bank.com');
-            setRiskData({ max_risk_score: 0.12, detections: {} });
+            setRiskData({ 
+                max_risk_score: 0.65, 
+                detections: { impersonation: { probability: 0.4 } },
+                behavioral_reasons: [
+                    { 
+                        id: "SUDDEN_INTERACTION", 
+                        desc: "Sudden interaction detected", 
+                        detail: "You interacted with this page much faster than your usual pattern for banking sites." 
+                    }
+                ]
+            });
             setLoading(false);
         }, 500);
     }
@@ -64,63 +82,101 @@ export function ContextCard({ detailed = false }: { detailed?: boolean }) {
   
   const statusColor = isHighRisk ? "text-rose-500" : isSuspicious ? "text-amber-500" : "text-emerald-500";
   const statusBg = isHighRisk ? "bg-rose-500" : isSuspicious ? "bg-amber-500" : "bg-emerald-500";
-  const statusBorder = isHighRisk ? "border-rose-500/20" : isSuspicious ? "border-amber-500/20" : "border-emerald-500/20";
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Current Context</h2>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="font-mono text-sm truncate max-w-[180px]">{currentUrl || 'Scanning...'}</span>
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-5">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Context Analysis</h2>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm font-semibold truncate max-w-[180px]">{currentUrl || 'Scanning...'}</span>
           </div>
         </div>
         {loading ? (
-             <div className="animate-pulse w-8 h-8 rounded-full bg-muted" />
+             <div className="animate-pulse w-9 h-9 rounded-xl bg-muted" />
         ) : (
-             <div className={cn("flex items-center justify-center w-8 h-8 rounded-full bg-opacity-10", statusBg)}>
-                {isHighRisk ? <AlertTriangle className={cn("w-4 h-4", statusColor)} /> : 
-                 isSuspicious ? <Search className={cn("w-4 h-4", statusColor)} /> :
-                 <CheckCircle className={cn("w-4 h-4", statusColor)} />}
+             <div className={cn("flex items-center justify-center w-9 h-9 rounded-xl transition-colors duration-500", statusBg, "bg-opacity-10")}>
+                {isHighRisk ? <AlertTriangle className={cn("w-5 h-5", statusColor)} /> : 
+                 isSuspicious ? <Search className={cn("w-5 h-5", statusColor)} /> :
+                 <CheckCircle className={cn("w-5 h-5", statusColor)} />}
              </div>
         )}
       </div>
 
-      <div className="relative pt-2 pb-6">
-        {/* Risk Meter Bar */}
-        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+      <div className="space-y-3">
+        <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
            <motion.div 
              initial={{ width: 0 }}
              animate={{ width: `${score * 100}%` }}
-             transition={{ duration: 0.5, ease: "easeOut" }}
-             className={cn("h-full rounded-full", statusBg)}
+             transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
+             className={cn("h-full rounded-full transition-colors duration-500", statusBg)}
            />
         </div>
-        <div className="mt-2 flex justify-between items-center">
-             <span className={cn("text-2xl font-bold", statusColor)}>
-                {(score * 100).toFixed(0)}%
-             </span>
-             <span className="text-sm text-muted-foreground">
-                {isHighRisk ? 'High Risk detected' : isSuspicious ? 'Suspicious patterns' : 'Likely Safe'}
+        <div className="flex justify-between items-end">
+             <div className="flex flex-col">
+                <span className={cn("text-3xl font-black tracking-tighter transition-colors duration-500", statusColor)}>
+                    {(score * 100).toFixed(0)}%
+                </span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Risk Level</span>
+             </div>
+             <span className="text-xs font-medium bg-secondary px-2 py-1 rounded-md text-secondary-foreground mb-1">
+                {isHighRisk ? 'High Threat' : isSuspicious ? 'Suspicious' : 'Likely Safe'}
              </span>
         </div>
       </div>
 
+      <AnimatePresence>
+        {riskData?.behavioral_reasons && riskData.behavioral_reasons.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 space-y-3"
+          >
+            <div className="flex items-center gap-2 text-amber-600">
+                <UserCheck className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Behavioral Insight</span>
+            </div>
+            
+            {riskData.behavioral_reasons.map((reason, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-amber-900">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    {reason.desc}
+                </div>
+                <p className="text-xs text-amber-800/70 leading-relaxed font-medium pl-3.5">
+                    {reason.detail}
+                </p>
+              </div>
+            ))}
+            
+            <div className="pt-2 flex items-center gap-2 text-[10px] text-amber-700/60 italic font-medium">
+                <Info size={10} />
+                <span>This check is performed locally for your privacy.</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {detailed && riskData && (
-        <div className="mt-4 pt-4 border-t border-border space-y-2">
-            <h3 className="text-xs font-medium mb-2">Analysis Vector</h3>
-            <div className="space-y-2">
+        <div className="pt-4 border-t border-border space-y-4">
+            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Heuristic Signals</h3>
+            <div className="grid grid-cols-1 gap-3">
                 {['urgency', 'authority', 'fear', 'impersonation'].map(label => {
                     const prob = riskData.detections[label]?.probability || 0;
                     if (prob < 0.1) return null;
                     return (
-                        <div key={label} className="flex items-center justify-between text-xs">
-                            <span className="capitalize text-muted-foreground">{label}</span>
-                            <div className="flex items-center gap-2">
-                                <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
-                                    <div className="h-full bg-primary/50" style={{ width: `${prob * 100}%` }} />
-                                </div>
-                                <span className="w-8 text-right">{(prob * 100).toFixed(0)}%</span>
+                        <div key={label} className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between text-[11px] font-bold">
+                                <span className="capitalize text-muted-foreground">{label}</span>
+                                <span className="text-primary">{(prob * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="h-1 w-full bg-secondary/30 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: `${prob * 100}%` }}
+                                    className="h-full bg-primary/40 rounded-full" 
+                                />
                             </div>
                         </div>
                     )
