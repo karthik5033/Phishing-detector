@@ -47,9 +47,9 @@ vectorizer = HashingVectorizer(
 )
 
 # Multi-Output SGD
-# n_jobs=1 to avoid Windows multiprocessing issues with partial_fit
+# class_weight={0:1, 1:10} manually sets a 10x penalty for missed phishing sites (Stable fix)
 clf = MultiOutputClassifier(
-    SGDClassifier(loss='log_loss', penalty='l2', alpha=1e-4, random_state=42, max_iter=1000, tol=1e-3),
+    SGDClassifier(loss='log_loss', penalty='l2', alpha=1e-4, random_state=42, max_iter=1000, tol=1e-3, class_weight={0: 1, 1: 10}),
     n_jobs=1
 )
 

@@ -1,38 +1,14 @@
-# Secrets
+__pycache__/
+*.pyc
 .env
-.env.local
-.env.*.local
-*.pem
-*.key
-
-# Dependencies
-node_modules
-__pycache__
-.venv
-venv
-bin
-obj
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Editor
-.vscode
-.idea
-*.suo
-*.ntvs
-*.njsproj
-*.sln
-*.swp
-
-# Build
-dist
-build
-.next
-out
-
-
-data/processed/
+venv/
+node_modules/
+.next/
+dist/
+build/
+*.csv
 ext_data/
-models/
+data/
+ext_data/
+data/
+
