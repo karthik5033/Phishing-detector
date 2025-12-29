@@ -30,6 +30,11 @@ DATASETS = [
         "path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "ext_data", "gemini-dataset-made.csv"),
         "url_col": "text", # Renaming text -> url
         "labels": ["urgency", "authority", "fear", "impersonation"]
+    },
+    {
+        "path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "ext_data", "hard_negatives.csv"),
+        "url_col": "url",
+        "labels": ["urgency", "authority", "fear", "impersonation"]
     }
 ]
 

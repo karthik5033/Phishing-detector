@@ -171,6 +171,35 @@ async def detect_attack(request: DetectionRequest):
             r'spotify\.com',
             r'apple\.com',
             r'microsoft\.com',
+            # Regional & Subdomain Google
+            r'(^|\.)google\.(co\.[a-z]{2}|com?\.[a-z]{2}|[a-z]{2})([/?#]|$)',
+            r'(^|\.)google([/?#]|$)', # Covers .google TLD (blog.google, about.google)
+            r'(^|\.)google\.com', 
+            r'families\.google',
+            r'blog\.google',
+            r'about\.google',
+            r'store\.google',
+            # News & Media
+            r'britannica\.com',
+            r'imdb\.com',
+            r'quora\.com',
+            r'indiatimes\.com',
+            r'thehindu\.com',
+            r'nytimes\.com',
+            r'bbc\.com',
+            r'bbc\.co\.uk',
+            r'cnn\.com',
+            r'(^|\.)brave\.com',
+            r'(^|\.)brave\.app', # status.brave.app
+            r'brave\.com',
+            # Tech & Finance (Fixes for False Positives)
+            r'(^|\.)oracle\.com',
+            r'(^|\.)jpmorgan\.com',
+            r'(^|\.)jpmorganchase\.com',
+            r'(^|\.)deepseek\.com',
+            r'(^|\.)chat\.deepseek\.com',
+            r'(^|\.)openai\.com',
+            r'(^|\.)chatgpt\.com',
         ]
         
         # Check if URL matches safe patterns
