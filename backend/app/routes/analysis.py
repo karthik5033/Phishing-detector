@@ -13,6 +13,7 @@ from app.services.impersonation import analyze_impersonation
 import hashlib
 import uuid
 
+print("LOADING ANALYSIS MODULE FROM backend/app/routes/analysis.py")
 router = APIRouter(prefix="/api/v1", tags=["analysis"])
 
 def get_risk_level(score: float) -> RiskLevel:
@@ -52,6 +53,20 @@ async def unblock_domain(request: BlockRequest, db: Session = Depends(get_db)):
         return {"status": "skipped", "message": "Domain not found in blocklist."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/blocklist")
+async def get_blocklist(db: Session = Depends(get_db)):
+    """Get all permanently blocked domains"""
+    try:
+        blocked_domains = db.query(models.BlockedDomain).all()
+        return {
+            "status": "success",
+            "count": len(blocked_domains),
+            "domains": [{"domain": bd.domain, "blocked_at": bd.created_at.isoformat() if hasattr(bd, 'created_at') else None} for bd in blocked_domains]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_message(

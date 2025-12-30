@@ -8,6 +8,8 @@ import sys
 
 # Add parent directory to path to access models if needed
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add current directory (backend) to path to ensure 'app' module can be imported
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = FastAPI(title="Social Engineering Detection API")
 
@@ -124,9 +126,6 @@ class DetectionResponse(BaseModel):
     labels: dict[str, LabelResult]
 
 # Create API Router
-api_router = FastAPI() # We will mount this or use router
-
-# Actually, simpler to just include router
 from fastapi import APIRouter
 router = APIRouter(prefix="/api/v1")
 recent_scans = []
@@ -205,6 +204,38 @@ async def detect_attack(request: DetectionRequest):
         # Check if URL matches safe patterns
         is_whitelisted = any(re.search(pattern, text.lower()) for pattern in safe_patterns)
         
+        # CHECK ALLOWED DOMAINS (Whitelist override)
+        try:
+             # Reuse URL parsing
+             from urllib.parse import urlparse
+             parsed = urlparse(text)
+             hostname = parsed.netloc or parsed.path
+             if hostname.startswith("www."): hostname = hostname[4:]
+             
+             db = SessionLocal()
+             allowed = db.query(models.AllowedDomain).filter(models.AllowedDomain.domain == hostname).first()
+               # Check parent
+             if not allowed and '.' in hostname:
+                 parts = hostname.split('.')
+                 if len(parts) > 2:
+                     parent = '.'.join(parts[1:])
+                     allowed = db.query(models.AllowedDomain).filter(models.AllowedDomain.domain == parent).first()
+             
+             if allowed:
+                  db.close()
+                  return {
+                    "text": text,
+                    "max_risk_score": 0.0,
+                    "labels": {
+                        "urgency": {"probability": 0.0, "top_features": []},
+                        "authority": {"probability": 0.0, "top_features": []},
+                        "fear": {"probability": 0.0, "top_features": []},
+                        "impersonation": {"probability": 0.0, "top_features": []}
+                    } 
+                  }
+        except:
+             pass
+
         if is_whitelisted:
             # Return safe classification immediately
             return {
@@ -217,6 +248,43 @@ async def detect_attack(request: DetectionRequest):
                     "impersonation": {"probability": 0.0, "top_features": []}
                 }
             }
+
+        # CHECK DATABASE BLOCKLIST (Immediate enforcement)
+        try:
+             # Clean URL to get hostname for check
+             from urllib.parse import urlparse
+             parsed = urlparse(text)
+             hostname = parsed.netloc or parsed.path
+             if hostname.startswith("www."): hostname = hostname[4:]
+             
+             db = SessionLocal()
+             # Check exact hostname match
+             blocked = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == hostname).first()
+             # Check parent domain match if not found
+             if not blocked and '.' in hostname:
+                 parts = hostname.split('.')
+                 if len(parts) > 2:
+                     parent = '.'.join(parts[1:])
+                     blocked = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == parent).first()
+             
+             db.close()
+             
+             if blocked:
+                 print(f"🚫 BLOCKED DETECTED: {text} (Matched: {blocked.domain})")
+                 return {
+                    "text": text,
+                    "max_risk_score": 1.0, # Force BLOCK
+                    "labels": {
+                        "urgency": {"probability": 1.0, "top_features": [{"word": "BLOCKED_BY_USER", "weight": 1.0}]},
+                        "authority": {"probability": 0.0, "top_features": []},
+                        "fear": {"probability": 0.0, "top_features": []},
+                        "impersonation": {"probability": 0.0, "top_features": []}
+                    } 
+                 }
+        except Exception as e:
+            print(f"Blocklist check error: {e}")
+
+        # Clean and Vectorize input
 
         # Clean and Vectorize input
         clean_text = clean_url(text)
@@ -278,8 +346,22 @@ async def detect_attack(request: DetectionRequest):
         # Refine type
         if max_prob > 0.5 and "urgency" in top_label: display_type = "Social Eng."
         
+        from urllib.parse import urlparse
+        # Extract pure hostname for strict blocking
+        try:
+             parsed = urlparse(text)
+             hostname = parsed.netloc or parsed.path # Handle case where protocol might be missing
+             if hostname.startswith("www."): hostname = hostname[4:]
+             # Fallback if parsing fails (e.g. just text)
+             if not hostname: hostname = text 
+        except:
+             hostname = text
+
+        import uuid
         scan_entry = {
-            "domain": text[:50] + "..." if len(text) > 50 else text,
+            "id": str(uuid.uuid4()),
+            "domain": text[:50] + "..." if len(text) > 50 else text, # Display text
+            "hostname": hostname, # Strict blocking domain
             "type": display_type,
             "timestamp": timestamp,
             "risk_score": max_prob
@@ -361,6 +443,7 @@ async def get_activity_log(limit: int = 50):
     
     # Convert recent_scans to detailed activity format
     activity_items = []
+    seen_ids = set()
     for idx, scan in enumerate(recent_scans[:limit]):
         risk_score = scan['risk_score']
         
@@ -384,8 +467,20 @@ async def get_activity_log(limit: int = 50):
         }
         category = category_map.get(scan['type'], "Unknown")
         
+        # Deduplicate IDs to prevent React keys error
+        item_id = scan.get("id", idx + 10000)
+        
+        # Ensure ID is unique in valid list
+        original_id = item_id
+        dup_count = 1
+        while item_id in seen_ids:
+            item_id = f"{original_id}_{dup_count}"
+            dup_count += 1
+        seen_ids.add(item_id)
+
         activity_items.append({
-            "id": idx + 1,
+            "id": item_id,
+            "hostname": scan.get("hostname", scan['domain']), # Use specific hostname or fallback to display domain
             "domain": scan['domain'],
             "timestamp": scan['timestamp'],
             "risk_score": risk_score,
@@ -396,32 +491,107 @@ async def get_activity_log(limit: int = 50):
             "is_blocked": risk_score > 0.8
         })
     
-    # If no scans yet, return sample data
+    
+    # Return empty list if no scans (Don't show bluff data)
     if not activity_items:
-        activity_items = [{
-            "id": 1,
-            "domain": "example.com",
-            "timestamp": datetime.now().isoformat(),
-            "risk_score": 0.1,
-            "risk_level": "LOW",
-            "status": "SAFE",
-            "category": "Safe",
-            "explanation": "No threats detected. Awaiting real traffic data.",
-            "is_blocked": False
-        }]
+        return []
     
     return activity_items
 
 # Include the router in the main app
 app.include_router(router)
 
+# --- DIRECT BLOCKING ENDPOINTS (To fix 404 issue) ---
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app import models
+from pydantic import BaseModel
+
+class DirectBlockRequest(BaseModel):
+    domain: str
+
+@app.post("/api/v1/block")
+@app.post("/block_direct") # Debug alias
+async def direct_block_domain(request: DirectBlockRequest, db: Session = Depends(get_db)):
+    try:
+        # Check if already blocked
+        exists = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == request.domain).first()
+        if not exists:
+            blocked = models.BlockedDomain(domain=request.domain)
+            db.add(blocked)
+            db.commit()
+            print(f"Direct block success: {request.domain}")
+            return {"status": "success", "message": f"Domain {request.domain} blocked permanently."}
+        return {"status": "skipped", "message": "Domain already blocked."}
+    except Exception as e:
+        print(f"Direct block error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/unblock")
+async def unblock_domain(request: DirectBlockRequest, db: Session = Depends(get_db)):
+    try:
+        # Remove from Blocked list
+        item = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == request.domain).first()
+        if item:
+            db.delete(item)
+        
+        # Add to Allowed list (Whitelist against AI)
+        existing_allowed = db.query(models.AllowedDomain).filter(models.AllowedDomain.domain == request.domain).first()
+        if not existing_allowed:
+            new_allowed = models.AllowedDomain(domain=request.domain)
+            db.add(new_allowed)
+
+        db.commit()
+        print(f"Unblocked and whitelisted: {request.domain}")
+        return {"status": "success", "message": f"Unblocked and whitelisted {request.domain}"}
+    except Exception as e:
+        print(f"Direct unblock error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/blocklist")
+async def direct_get_blocklist(db: Session = Depends(get_db)):
+    try:
+        blocked_domains = db.query(models.BlockedDomain).all()
+        return {
+            "status": "success",
+            "count": len(blocked_domains),
+            "domains": [{"domain": bd.domain, "blocked_at": bd.created_at.isoformat() if hasattr(bd, 'created_at') else None} for bd in blocked_domains]
+        }
+    except Exception as e:
+        print(f"Direct blocklist error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+# ----------------------------------------------------
+
+@app.on_event("startup")
+async def startup_event():
+    # Create tables if they don't exist
+    print("Checking database tables...")
+    try:
+        from app.database import engine
+        models.Base.metadata.create_all(bind=engine)
+        print("Database tables checked/created.")
+    except Exception as e:
+        print(f"Database initialization warning (safe to ignore if tables exist): {e}")
+    
+    print("\n\n--- REGISTERED ROUTES ---")
+    for route in app.routes:
+        if hasattr(route, "path"):
+            print(f"ROUTE: {route.path}")
+    print("-------------------------\n\n")
+
 @app.get("/health")
 async def health():
     from datetime import datetime
+    routes = []
+    for route in app.routes:
+        if hasattr(route, "path"):
+            routes.append(route.path)
+            
     return {
         "status": "ok",
         "api_version": "v1",
-        "endpoints": ["/api/v1/detect", "/api/v1/dashboard", "/api/v1/activity"],
+        "endpoints": routes,
         "timestamp": datetime.now().isoformat(),
         "message": "SecureSentinel API is running"
     }

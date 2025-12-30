@@ -19,3 +19,10 @@ class BlockedDomain(Base):
     id = Column(Integer, primary_key=True, index=True)
     domain = Column(String, unique=True, index=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+class AllowedDomain(Base):
+    __tablename__ = "allowed_domains"
+
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(String, unique=True, index=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())

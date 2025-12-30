@@ -1,14 +1,101 @@
 /**
- * SecureSentinel Service Worker v2.0
- * Clean implementation - No errors
+ * SecureSentinel Service Worker v3.0
+ * Real-time blocking enabled
  */
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
-console.log("[SecureSentinel] Service Worker v2.0 - Build: 2025-12-30");
+console.log("[SecureSentinel] Service Worker v3.0 - Build: 2025-12-30");
 
 // Cache for analyzed URLs
 const cache = new Map();
 const CACHE_DURATION = 3600000; // 1 hour
+
+// Temporary whitelist (session only)
+const tempWhitelist = new Set();
+
+// Permanent blocklist (synced from backend)
+let permanentBlocklist = new Set();
+
+// Settings
+const DEFAULT_SETTINGS = {
+    blockingEnabled: true,
+    blockThreshold: 0.7,  // 70% risk score triggers block
+    showWarnings: true
+};
+
+/**
+ * Sync permanent blocklist from backend
+ */
+async function syncBlocklist() {
+    try {
+        const response = await fetch(`${API_BASE}/blocklist`, {
+            method: "GET",
+            cache: "no-cache"
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log("[SecureSentinel] 📥 Received blocklist data:", data);
+            
+            permanentBlocklist.clear();
+            
+            if (data.domains && Array.isArray(data.domains)) {
+                data.domains.forEach(item => {
+                    permanentBlocklist.add(item.domain.toLowerCase().trim()); // Normalize
+                });
+                console.log(`[SecureSentinel] 📋 Synced ${permanentBlocklist.size} permanently blocked domains:`, Array.from(permanentBlocklist));
+            }
+        } else {
+             console.error(`[SecureSentinel] ❌ Blocklist sync failed: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("[SecureSentinel] ❌ Failed to sync blocklist (Network Error):", error);
+    }
+}
+
+/**
+ * Check if domain is in permanent blocklist
+ */
+function isPermanentlyBlocked(url) {
+    try {
+        const urlObj = new URL(url);
+        const domain = urlObj.hostname.toLowerCase(); // Normalize
+        
+        console.log(`[SecureSentinel] 🔍 Checking: ${domain} (Blocklist size: ${permanentBlocklist.size})`);
+        
+        // Debug: Log first 5 items if list is small or debugging
+        if (permanentBlocklist.size > 0 && permanentBlocklist.size < 10) {
+             console.log("[SecureSentinel] Blocklist content:", Array.from(permanentBlocklist));
+        }
+
+        // Check exact match
+        if (permanentBlocklist.has(domain)) {
+            console.log(`[SecureSentinel] 🚫 EXACT MATCH found for: ${domain}`);
+            return true;
+        }
+        
+        // Check if any parent domain is blocked
+        const parts = domain.split('.');
+        for (let i = 0; i < parts.length - 1; i++) {
+            const parentDomain = parts.slice(i).join('.');
+            if (permanentBlocklist.has(parentDomain)) {
+                return true;
+            }
+        }
+        
+        return false;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Get user settings
+ */
+async function getSettings() {
+    const result = await chrome.storage.local.get('settings');
+    return { ...DEFAULT_SETTINGS, ...result.settings };
+}
 
 /**
  * Check backend health on startup
@@ -33,7 +120,14 @@ async function checkBackend() {
 chrome.runtime.onInstalled.addListener(() => {
     console.log("[SecureSentinel] Extension installed");
     checkBackend();
+    syncBlocklist(); // Sync blocklist on install
 });
+
+// Sync blocklist every 5 minutes
+setInterval(syncBlocklist, 5 * 60 * 1000);
+
+// Initial sync
+syncBlocklist();
 
 /**
  * Analyze URL for phishing/malicious content
@@ -42,7 +136,6 @@ async function analyzeURL(url, isMainFrame = false) {
     // Check cache first
     const cached = cache.get(url);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        // Even if cached, we might need to update stats if it's a main frame visit
         if (isMainFrame) updateStats(url, cached.data.max_risk_score, true);
         return cached.data;
     }
@@ -90,9 +183,6 @@ async function analyzeURL(url, isMainFrame = false) {
 /**
  * Update statistics for popup
  */
-/**
- * Stats management
- */
 async function updateStats(url, riskScore, isMainFrame) {
     try {
         const result = await chrome.storage.local.get(['scansToday', 'threatsBlocked', 'recentScans', 'lastResetDate']);
@@ -119,7 +209,6 @@ async function updateStats(url, riskScore, isMainFrame) {
         
         // HISTORY LOGIC:
         // Only log if it's the MAIN PAGE we visited, OR if it's a THREAT found on the page.
-        // Ignore safe links to avoid spamming "brave.com", "google.com" etc.
         if (isMainFrame || riskScore > 0.5) {
             // Avoid duplicate consecutive entries
             if (recentScans.length === 0 || recentScans[0].url !== url) {
@@ -144,6 +233,71 @@ async function updateStats(url, riskScore, isMainFrame) {
 }
 
 /**
+ * Web Navigation Listener - Real-time blocking
+ */
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+    // Only process main frame navigations
+    if (details.frameId !== 0) return;
+    
+    const url = details.url;
+    const tabId = details.tabId;
+    
+    // Skip chrome:// and extension pages
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
+        return;
+    }
+    
+    // Check if URL is whitelisted
+    if (tempWhitelist.has(url)) {
+        console.log("[SecureSentinel] ✅ Whitelisted:", url);
+        return;
+    }
+    
+    // Get settings
+    const settings = await getSettings();
+    if (!settings.blockingEnabled) {
+        console.log("[SecureSentinel] ⏸️ Blocking disabled");
+        return;
+    }
+    
+    // PRIORITY 1: Check permanent blocklist (instant block, no API call needed)
+    if (isPermanentlyBlocked(url)) {
+        console.log("[SecureSentinel] 🚫 PERMANENTLY BLOCKED:", url);
+        
+        // Redirect to blocking page with permanent block indicator
+        const blockedPageUrl = chrome.runtime.getURL('blocked.html') +
+            '?url=' + encodeURIComponent(url) +
+            '&risk=1.0' +
+            '&permanent=true' +
+            '&labels=' + encodeURIComponent(JSON.stringify({
+                blocked: { probability: 1.0, top_features: [] }
+            }));
+        
+        chrome.tabs.update(tabId, { url: blockedPageUrl });
+        return;
+    }
+    
+    // PRIORITY 2: Analyze URL with AI model
+    console.log("[SecureSentinel] 🔍 Analyzing navigation:", url);
+    const analysis = await analyzeURL(url, true);
+    
+    // Check if should block based on risk score
+    if (analysis.max_risk_score >= settings.blockThreshold) {
+        console.log("[SecureSentinel] 🛑 BLOCKING:", url, "Risk:", analysis.max_risk_score);
+        
+        // Redirect to blocking page
+        const blockedPageUrl = chrome.runtime.getURL('blocked.html') +
+            '?url=' + encodeURIComponent(url) +
+            '&risk=' + analysis.max_risk_score +
+            '&labels=' + encodeURIComponent(JSON.stringify(analysis.labels));
+        
+        chrome.tabs.update(tabId, { url: blockedPageUrl });
+    } else {
+        console.log("[SecureSentinel] ✅ Safe:", url, "Risk:", analysis.max_risk_score);
+    }
+});
+
+/**
  * Message handler
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -154,10 +308,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true; 
     }
     
+    if (message.type === "WHITELIST_TEMP") {
+        // Add URL to temporary whitelist
+        tempWhitelist.add(message.url);
+        console.log("[SecureSentinel] ➕ Whitelisted:", message.url);
+        sendResponse({ success: true });
+        return false;
+    }
+    
+    if (message.type === "LOG_BLOCKED") {
+        // Log blocked attempt
+        console.log("[SecureSentinel] 📝 Logged block:", message.url);
+        sendResponse({ success: true });
+        return false;
+    }
+    
+    if (message.type === "REPORT_FALSE_POSITIVE") {
+        // Handle false positive report
+        console.log("[SecureSentinel] 📢 False positive reported:", message.url);
+        // Could send to backend for retraining
+        sendResponse({ success: true });
+        return false;
+    }
+    
     if (message.type === "PING") {
         sendResponse({ status: "ok" });
         return false;
     }
 });
 
-console.log("[SecureSentinel] Service Worker ready");
+console.log("[SecureSentinel] Service Worker ready - Blocking enabled");

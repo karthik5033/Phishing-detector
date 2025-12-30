@@ -1,10 +1,12 @@
 {
   "manifest_version": 3,
   "name": "SecureSentinel",
-  "version": "2.1.0",
-  "description": "Real-time phishing and social engineering detection for search results",
+  "version": "3.0.0",
+  "description": "Real-time phishing and social engineering detection with automatic blocking",
   "permissions": [
-    "storage"
+    "storage",
+    "webNavigation",
+    "tabs"
   ],
   "host_permissions": [
     "http://127.0.0.1:8000/*"
@@ -31,6 +33,12 @@
       ],
       "js": ["src/content/content.js"],
       "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html", "blocked.css", "blocked.js"],
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {
