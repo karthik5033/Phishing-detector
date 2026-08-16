@@ -285,8 +285,17 @@ def get_ml_score(url: str) -> float | None:
 def get_registered_domain(url: str) -> str:
     try:
         ext = tldextract.extract(url)
-        return f"{ext.domain}.{ext.suffix}".lower() if ext.suffix else ext.domain.lower()
-    except:
+        # Use registered_domain when available (gives domain.tld), else fall back safely
+        reg = getattr(ext, 'registered_domain', None)
+        if reg:
+            return reg.lower()
+        # If no registered_domain, build carefully ensuring no leading dot
+        if ext.domain and ext.suffix:
+            return f"{ext.domain}.{ext.suffix}".lower()
+        if ext.domain:
+            return ext.domain.lower()
+        return ""
+    except Exception:
         return ""
 
 # ===========================
@@ -656,8 +665,8 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
 def get_blocklist(db: Session = Depends(get_db)):
     try:
         blocked = db.query(models.BlockedDomain).all()
-        domains_list = [{"domain": b.domain, "timestamp": (b.timestamp.isoformat() + "Z") if b.timestamp else None} for b in blocked]
-        # Return in format expected by extension: {domains: [...]}
+        # Return simple list of domain strings (extensions expect {"domains": ["a.com", ...]})
+        domains_list = sorted([b.domain for b in blocked if b.domain])
         return {"domains": domains_list}
     except Exception as e:
         print(f"Blocklist Error: {e}")
@@ -740,6 +749,8 @@ def block_domain(request: DomainRequest, db: Session = Depends(get_db)):
 def unblock_domain(request: DomainRequest, db: Session = Depends(get_db)):
     try:
         clean_domain = normalize_domain(request.domain)
+        if not clean_domain:
+            raise HTTPException(status_code=400, detail="Invalid domain")
         # Remove from blocklist
         db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == clean_domain).delete()
         
@@ -750,6 +761,8 @@ def unblock_domain(request: DomainRequest, db: Session = Depends(get_db)):
         
         db.commit()
         return {"status": "unblocked_and_whitelisted", "domain": clean_domain}
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
