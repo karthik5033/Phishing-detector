@@ -372,12 +372,11 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         }
     
     # Extract Domain using consistent normalizer
-    clean_host = normalize_domain(url)
-    domain = clean_host
-    clean_domain = clean_host.replace("www.", "")
+    domain = normalize_domain(url)
+    clean_domain = domain
     
     # 0. Check Blocklist (Critical)
-    blocked_entry = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == clean_host).first()
+    blocked_entry = db.query(models.BlockedDomain).filter(models.BlockedDomain.domain == domain).first()
     if blocked_entry:
          scan_entry = models.ScanResult(
             url=url,
