@@ -667,11 +667,27 @@ def get_blocklist(db: Session = Depends(get_db)):
 
 # Pydantic Models for Activity
 def normalize_domain(d: str):
-    if not d: return ""
-    d = str(d).lower().strip()
-    d = re.sub(r"^https?://", "", d)
-    d = d.split("/")[0]
-    return d
+    """Normalize input to a host without scheme, path, or port and strip leading 'www.'
+
+    Accepts full URLs or bare host names. Returns lower-cased host (e.g. 'example.com').
+    """
+    if not d:
+        return ""
+    s = str(d).strip()
+    try:
+        from urllib.parse import urlparse
+        # Ensure there's a scheme so urlparse places netloc correctly
+        if not re.match(r'^[a-zA-Z]+://', s):
+            s = 'http://' + s
+        parsed = urlparse(s)
+        host = parsed.hostname or parsed.path or ''
+    except Exception:
+        host = s
+    host = host.lower().strip()
+    # Strip leading www.
+    if host.startswith('www.'):
+        host = host[4:]
+    return host
 
 # Pydantic Models for Activity
 class DomainRequest(BaseModel):
