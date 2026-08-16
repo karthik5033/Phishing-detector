@@ -798,7 +798,24 @@ def update_privacy_settings_endpoint(pii_masking: str = None, retention_days: st
 
 
 @app.delete("/api/v1/reset")
-def reset_system(db: Session = Depends(get_db)):
+from fastapi import Security
+
+
+def require_admin(request: Request):
+    """Simple admin token check. Set ADMIN_TOKEN in env to enable protection.
+    The client must send header 'X-Admin-Token: <token>' to pass."""
+    admin_token = os.getenv('ADMIN_TOKEN')
+    header = request.headers.get('x-admin-token')
+    if not admin_token:
+        # No admin token configured — deny to avoid accidental resets in production
+        raise HTTPException(status_code=401, detail="Admin token not configured")
+    if header != admin_token:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
+
+
+@app.delete("/api/v1/reset")
+def reset_system(db: Session = Depends(get_db), _admin: bool = Depends(require_admin)):
     try:
         db.query(models.ScanResult).delete()
         db.query(models.BlockedDomain).delete()
@@ -1004,4 +1021,5 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    # Bind to localhost by default to avoid exposing the dev server
+    uvicorn.run(app, host="127.0.0.1", port=8002)
