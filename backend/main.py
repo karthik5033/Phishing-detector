@@ -25,7 +25,7 @@ from app import models
 from app.services.llm import get_llm_service, LlmService
 
 app = FastAPI(
-    title="SecureSentinel API",
+    title="ClickWise API",
     description="Real-time Phishing Detection using Sklearn (Reverted)",
     version="4.0.0", 
     docs_url="/docs",
@@ -477,8 +477,8 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         if kw in url_lower:
              # Check if whitelisted first (e.g. news articles about gambling)
              is_benign = False
-             for domain in BENIGN_DOMAINS:
-                 if domain in url_lower: is_benign = True
+             for benign_domain in BENIGN_DOMAINS:
+                 if benign_domain in url_lower: is_benign = True
              
              if not is_benign:
                  print(f"DEBUG: Suspicious Keyword Match -> {kw}")
@@ -986,4 +986,4 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8002)
