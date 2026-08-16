@@ -1,6 +1,0 @@
-Medium   0.625  https://campus2college.com/rv-college-of-engineering
-Medium   0.607  https://icoeca.com/about-rvce
-Medium   0.630  https://www.highereducationdigest.com/rv-college-of-e
-Low      0.026  https://rvce.ac.in/admission
-Low      0.000  https://google.com
-High     0.900  https://paypal-verify-account.xyz/login

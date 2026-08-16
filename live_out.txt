@@ -1,8 +1,0 @@
-Low      0.000  https://google.com
-Low      0.000  https://accounts.google.com/signin
-High     0.900  https://paypal-verify-account.xyz/login
-High     0.900  https://secure-banking-update.tk/verify
-Low      0.000  https://github.com/login
-Low      0.000  https://www.amazon.com/ap/signin
-High     0.928  http://192.168.1.1/admin/login
-High     0.899  https://totally-not-facebook.xyz/login/verify
