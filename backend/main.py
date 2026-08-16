@@ -746,20 +746,6 @@ PRIVACY_CONFIG = {
 def get_privacy_settings():
     return PRIVACY_CONFIG
 
-@app.post("/api/v1/privacy/settings")
-async def update_privacy_settings(request: Request):
-    try:
-        data = await request.json()
-        print(data) # Debug
-        # Handle query params if sent that way or body
-        # Frontend sends query params in POST (weird but observed in code: ?pii_masking=...)
-        # Wait, the frontend code: fetch(`${API_BASE_URL}/privacy/settings?${params.toString()}`, { method: 'POST' });
-        # So we should check Query Params
-        pass 
-    except:
-        pass
-    return PRIVACY_CONFIG
-
 @app.post("/api/v1/privacy/settings_update") # Backup alias if needed
 async def update_settings_query(pii_masking: str = None, retention_days: str = None):
     if pii_masking is not None:
