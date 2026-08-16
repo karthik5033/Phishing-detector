@@ -90,6 +90,62 @@ LGBM_FEATURES = None
 OPTIMAL_THRESHOLD = 0.767
 MODEL_STATUS = "DISABLED"
 
+# ========== Detection Thresholds & Config ==========
+TRUSTED_DOMAIN_ML_CAP = 0.20  # cap ML score for known trusted domains
+MAX_CONFIDENCE_CAP = 0.98
+PHISHING_THRESHOLD = 0.60
+RISK_HIGH_THRESHOLD = 0.75
+RISK_MEDIUM_THRESHOLD = 0.40
+LLM_SUSPICION_THRESHOLD = 0.2
+LLM_MIN_CONFIDENCE_FOR_CHECK = 0.05
+BASELINE_LOW_CAP = 0.2
+
+# Keyword lists (centralized)
+STRICT_KEYWORDS = [
+    # Adult
+    "porn", "xxx", "adult", "sex", "nude", "hentai", "livecam", "webcam",
+    # Games (Strict: Block all free/download sites)
+    "free-games", "crack", "cheat", "hack", "warez", "repack",
+    "crazygames", "y8", "poki", "freetogame", "steamunlocked",
+    "gamestop", "epicgames", "ea.com", "ubisoft",
+    # Movies / Streaming (Strict - Piracy focus)
+    "torrent", "free-movies", "123movies", "camrip", "soap2day", "gomovies",
+    "download-free", "watch-free",
+    "filmyzilla", "vegamovies", "tamilrockers", "123mkv", "mp4moviez",
+    "bolly4u", "pagalworld", "djpunjab", "downloadhub", "worldfree4u",
+    "khatrimaza", "9xmovies", "full-movie-download", "movie-download-free",
+    # Anime Piracy Sites
+    "cartoonsarea", "gogoanime", "9anime", "kissanime", "animefree",
+    "animepahe", "animekisa", "zoro.to", "aniwatch", "animefreak",
+    "4anime", "animedao", "animesuge", "wcostream",
+    # Crypto / Telegram (High Risk Source)
+    "telegram", "bitcoin", "crypto", "coinswitch", "binance", "coinbase",
+    "wallet", "ledger", "trezor", "trustwallet", "metamask", "airdrop",
+    # Earning / Free Money / Surveys (High Risk of Scans/Spam)
+    "pollpay", "freecash", "rewardy", "swagbucks", "clickworker",
+    "earn-money", "make-money", "sidehustle", "cash-app", "money-making",
+    # APK / Mods (High Malware Risk)
+    "mod-apk", "hack-apk", "premium-apk", "paid-apk-free", "crack-apk",
+    # Specific MOD APK Sites (Known Malware Distributors)
+    "apktodo", "liteapks", "modyolo", "modlite", "happymod",
+    "an1.com", "rexdl", "revdl", "apkmody", "apkcombo", "apkdone",
+    # Internships / Jobs (Generic risk terms only)
+    "job-vacancy", "freshers"
+]
+
+SUSPICIOUS_KEYWORDS = [
+    # Gambling & Betting (High Risk of addiction/loss)
+    "online-casino", "slot-machine", "betting-app", "gambling",
+    "sports-bet", "poker-online", "roulette", "blackjack",
+    # High Risk Financial
+    "instant-loan", "payday-loan", "quick-cash", "crypto-doubler",
+    # AI / Deepfake (Ethical Risk)
+    "deepfake", "face-swap", "undress-ai", "nudify",
+    # Generic Spam
+    "click-here", "subscribe-now", "winner-claim"
+]
+
+
 def load_lgbm_model():
     global LGBM_MODEL, LGBM_FEATURES, OPTIMAL_THRESHOLD, MODEL_STATUS
     try:
@@ -394,40 +450,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
             "heuristics": {"note": "Verified Safe Domain"}
         }
 
-    # 0.2 Check Keyword Blacklist (Strict Policy: Adult, Piracy, Games, Crypto, Earning)
-    STRICT_KEYWORDS = [
-        # Adult
-        "porn", "xxx", "adult", "sex", "nude", "hentai", "livecam", "webcam",
-        # Games (Strict: Block all free/download sites)
-        "free-games", "crack", "cheat", "hack", "warez", "repack", 
-        "crazygames", "y8", "poki", "freetogame", "steamunlocked",
-        "gamestop", "epicgames", "ea.com", "ubisoft",
-        # Movies / Streaming (Strict - Piracy focus)
-        "torrent", "free-movies", "123movies", "camrip", "soap2day", "gomovies",
-        "download-free", "watch-free",
-        "filmyzilla", "vegamovies", "tamilrockers", "123mkv", "mp4moviez", 
-        "bolly4u", "pagalworld", "djpunjab", "downloadhub", "worldfree4u",
-        "khatrimaza", "9xmovies", "full-movie-download", "movie-download-free",
-        # Anime Piracy Sites
-        "cartoonsarea", "gogoanime", "9anime", "kissanime", "animefree",
-        "animepahe", "animekisa", "zoro.to", "aniwatch", "animefreak",
-        "4anime", "animedao", "animesuge", "wcostream",
-        # Removed legitimate services (Netflix, Hulu, etc.) from blacklist
-        # Crypto / Telegram (High Risk Source)
-        "telegram", "bitcoin", "crypto", "coinswitch", "binance", "coinbase",
-        "wallet", "ledger", "trezor", "trustwallet", "metamask", "airdrop",
-        # Earning / Free Money / Surveys (High Risk of Scans/Spam)
-        "pollpay", "freecash", "rewardy", "swagbucks", "clickworker",
-        "earn-money", "make-money", "sidehustle", "cash-app", "money-making",
-        # APK / Mods (High Malware Risk)
-        "mod-apk", "hack-apk", "premium-apk", "paid-apk-free", "crack-apk",
-        # Specific MOD APK Sites (Known Malware Distributors)
-        "apktodo", "liteapks", "modyolo", "modlite", "happymod",
-        "an1.com", "rexdl", "revdl", "apkmody", "apkcombo", "apkdone",
-        # Internships / Jobs (Generic risk terms only)
-        "job-vacancy", "freshers"  # Removed legitimate portals like Indeed, Naukri, SkillIndia to prevent FPs
-    ]
-    
+    # 0.2 Check Keyword Blacklist (Strict Policy) — keywords centralized in module-level STRICT_KEYWORDS
     url_lower = url.lower()
     for kw in STRICT_KEYWORDS:
         if kw in url_lower:
@@ -453,20 +476,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
                  "heuristics": {"policy_violation": f"Contains restricted keyword: {kw}"}
              }
 
-    # 0.3 Check Suspicious Keywords (Medium Risk: Gambling, loans, deepfakes)
-    # These return a WARNING (Yellow) instead of a BLOCK (Red)
-    SUSPICIOUS_KEYWORDS = [
-        # Gambling & Betting (High Risk of addiction/loss)
-        "online-casino", "slot-machine", "betting-app", "gambling", 
-        "sports-bet", "poker-online", "roulette", "blackjack",
-        # High Risk Financial
-        "instant-loan", "payday-loan", "quick-cash", "crypto-doubler",
-        # AI / Deepfake (Ethical Risk)
-        "deepfake", "face-swap", "undress-ai", "nudify",
-        # Generic Spam
-        "click-here", "subscribe-now", "winner-claim"
-    ]
-    
+    # 0.3 Check Suspicious Keywords (Medium Risk) — keywords centralized in module-level SUSPICIOUS_KEYWORDS
     for kw in SUSPICIOUS_KEYWORDS:
         if kw in url_lower:
              # Check if whitelisted first (e.g. news articles about gambling)
@@ -509,7 +519,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         # If registered domain is in trusted list, cap ML score hard at 0.20
         # This provides headroom so pop-ups stay green/yellow for known good sites
         if registered in TRUSTED_DOMAINS:
-            ml_score = min(ml_score, 0.20)
+            ml_score = min(ml_score, TRUSTED_DOMAIN_ML_CAP)
             print(f"[ML] Trusted domain cap applied: {registered} → ml_score capped to {ml_score:.3f}")
         
         # Adaptive blending — give ML more weight when it is very confident
@@ -547,7 +557,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         confidence = max(confidence, baseline)
         
         # Cap baseline influence for otherwise safe sites
-        if confidence < 0.2:
+        if confidence < BASELINE_LOW_CAP:
             confidence = min(confidence, 0.15)
             
     except Exception as e:
@@ -555,7 +565,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
 
     # 3b. LLM Verification (for Ambiguous Sites)
     # If site is "Low Risk" (<0.6) but has nonzero baseline, ask AI to confirm
-    if confidence < 0.6 and confidence > 0.05:
+    if confidence < PHISHING_THRESHOLD and confidence > LLM_MIN_CONFIDENCE_FOR_CHECK:
         try:
             print(f"DEBUG: asking LLM to double-check: {url}")
             llm_result = await service.analyze_url(url)
@@ -563,8 +573,8 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
             # Risk = 1.0 - Safety
             llm_risk = 1.0 - llm_result.get("confidence", 1.0)
             
-            # If LLM is suspicious (> 0.2), boost the score
-            if llm_risk > 0.2:
+            # If LLM is suspicious, boost the score
+            if llm_risk > LLM_SUSPICION_THRESHOLD:
                  # Significant boost if LLM is concerned
                  new_score = max(confidence, llm_risk)
                  if new_score > confidence:
@@ -578,7 +588,7 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
 
     # 3. Decision Logic & Sensitivity Adjustment
     # Dampen extremely high scores if not in blocklist to avoid false 100%s
-    if confidence > 0.98: confidence = 0.98
+    if confidence > MAX_CONFIDENCE_CAP: confidence = MAX_CONFIDENCE_CAP
     
     # Clean domain discount — reduce score for structurally legitimate domains
     # (reasonable length, no hyphens, common TLD)
@@ -608,11 +618,11 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         confidence = round(confidence * reduction, 4)
         print(f"[ML] Clean domain discount applied: {_domain}.{_suffix} → {confidence:.3f} (reduction={reduction})")
     
-    is_phishing = confidence > 0.60 
-    
-    if confidence >= 0.75:
+    is_phishing = confidence > PHISHING_THRESHOLD
+
+    if confidence >= RISK_HIGH_THRESHOLD:
         risk_level = "High"
-    elif confidence >= 0.40:
+    elif confidence >= RISK_MEDIUM_THRESHOLD:
         risk_level = "Medium"
     else:
         risk_level = "Low"
