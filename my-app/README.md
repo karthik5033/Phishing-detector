@@ -1,218 +1,195 @@
-# 📊 Dashboard Documentation
+# 🎨 ClickWise Dashboard - Next.js Frontend
 
-SecureSentinel Dashboard is a Next.js web application for monitoring browsing activity and managing security.
+Modern, responsive dashboard for the ClickWise phishing detection platform built with Next.js 16, React 19, and TailwindCSS 4.
 
 ---
 
-## 📁 File Structure
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+ 
+- npm or yarn
+- ClickWise backend running (see `../backend/README.md`)
+
+### Installation
+
+```bash
+# Navigate to frontend directory
+cd my-app
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env.local
+
+# Edit .env.local and set your backend URL
+# NEXT_PUBLIC_API_URL=http://127.0.0.1:8002/api/v1
+
+# Run development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📦 Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **React:** 19.2.3
+- **Styling:** TailwindCSS 4
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **TypeScript:** 5.x
+- **Deployment:** Vercel-ready
+
+---
+
+## 🏗️ Project Structure
 
 ```
 my-app/
-├── app/
-│   ├── dashboard/
-│   │   ├── page.tsx         # Overview/KPIs
-│   │   └── activity/
-│   │       └── page.tsx     # Activity log
-│   ├── page.tsx             # Landing page
-│   └── layout.tsx           # Root layout
-├── components/
-│   └── landing/             # Landing page components
-├── lib/
-│   └── constants.ts         # API URL config
-└── README.md               # This file
+├── app/                    # Next.js app router pages
+│   ├── dashboard/          # Main dashboard pages
+│   ├── features/           # Feature showcase pages
+│   ├── analyze/            # URL analysis page
+│   ├── architecture/       # System architecture docs
+│   └── layout.tsx          # Root layout
+├── components/             # Reusable React components
+│   ├── ui/                 # UI primitives (buttons, cards, etc.)
+│   └── ...                 # Feature components
+├── lib/                    # Utility functions
+│   ├── api.ts              # API client
+│   ├── utils.ts            # Helper functions
+│   └── constants.ts        # App constants
+├── types/                  # TypeScript type definitions
+├── public/                 # Static assets
+├── next.config.ts          # Next.js configuration
+└── vercel.json             # Vercel deployment config
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🔧 Available Scripts
 
-### Installation
 ```bash
-cd my-app
-npm install
-```
+# Development
+npm run dev              # Start dev server at localhost:3000
 
-### Development
-```bash
-npm run dev
-```
-Open: `http://localhost:3000`
+# Production
+npm run build            # Create production build
+npm start                # Start production server
 
-### Production Build
-```bash
-npm run build
-npm start
+# Code Quality
+npm run lint             # Run ESLint
+npm run type-check       # Run TypeScript type checking
+
+# Maintenance
+npm run clean            # Remove .next and node_modules
 ```
 
 ---
 
-## 📊 Dashboard Pages
+## 🌍 Environment Variables
 
-### 1. Overview (`/dashboard`)
-Shows key metrics:
-- **Total Scans**: URLs analyzed
-- **Threats Blocked**: High-risk sites
-- **Critical Blocked**: Red-flagged sites
-- **Safety Score**: 0-100 rating
+Create `.env.local` file in the root directory:
 
-**Features**:
-- Real-time polling (5 seconds)
-- Activity trend chart (7 days)
-- Recent interventions list
+```bash
+# Backend API URL
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8002/api/v1
+```
+
+**Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser.
 
 ---
 
-### 2. Activity Insights (`/dashboard/activity`)
-Detailed browsing history:
-- Domain visited
-- Timestamp
-- Risk score & level
-- Status (Blocked/Warned/Safe)
-- Category (Phishing/Social Eng/etc)
+## 📄 Key Pages
 
-**Features**:
-- Search & filter
-- Manual block/unblock
-- Auto-refresh every 5 seconds
-- Pagination (20 items/page)
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page with hero section |
+| `/dashboard` | Main dashboard with analytics |
+| `/dashboard/activity` | Recent scan activity log |
+| `/dashboard/controls` | Block/allow domain management |
+| `/dashboard/privacy` | Privacy settings |
+| `/analyze` | Manual URL analysis tool |
+| `/features/*` | Feature showcase pages |
+| `/docs` | Documentation |
+| `/architecture` | System architecture diagram |
+
+---
+
+## 🚢 Deployment
+
+### Deploy to Vercel
+
+**Quick Deploy:**
+1. Push code to GitHub
+2. Import project to Vercel
+3. Set `NEXT_PUBLIC_API_URL` environment variable in Vercel dashboard
+4. Deploy!
+
+**See full deployment guide:** [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
 ## 🔌 API Integration
 
-### Configuration
-Located in `lib/constants.ts`:
+The dashboard communicates with the ClickWise backend API.
+
+### API Client (`lib/api.ts`)
 ```typescript
-export const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL || 
-  "http://127.0.0.1:8002/api/v1";
+import { analyzeMessage } from '@/lib/api';
+
+// Analyze a message/URL
+const result = await analyzeMessage({
+  text: "https://example.com",
+  context: "URL analysis"
+});
 ```
 
-### Endpoints Used
-
-#### Dashboard Stats
-```typescript
-fetch(`${API_BASE_URL}/dashboard`)
-```
-Returns: KPIs, trends, recent activity
-
-#### Activity Log
-```typescript
-fetch(`${API_BASE_URL}/activity?limit=20`)
-```
-Returns: Paginated scan results
-
-#### Block Domain
-```typescript
-fetch(`${API_BASE_URL}/block`, {
-  method: "POST",
-  body: JSON.stringify({ domain: "example.com" })
-})
-```
-
-#### Unblock Domain
-```typescript
-fetch(`${API_BASE_URL}/unblock`, {
-  method: "POST",
-  body: JSON.stringify({ domain: "example.com" })
-})
-```
-
----
-
-## 🎨 UI Components
-
-### Overview Cards
-Show KPIs with icons and animations.
-
-### Activity Table
-- Sortable columns
-- Risk score badges
-- Block/unblock buttons
-- Category tags
-
-### Charts
-- Activity trend (7-day line chart)
-- Risk distribution
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-Create `.env.local`:
-```
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8002/api/v1
-```
-
-### Polling Interval
-Edit `app/dashboard/activity/page.tsx`:
-```typescript
-const interval = setInterval(fetchActivity, 5000); // 5 seconds
-```
+### Backend Endpoints Used
+- `POST /api/v1/detect` - URL/message analysis
+- `GET /api/v1/dashboard` - Dashboard stats
+- `GET /api/v1/activity` - Activity log
+- `GET /api/v1/blocklist` - Blocked domains
+- `POST /api/v1/block` - Block domain
+- `POST /api/v1/unblock` - Unblock domain
 
 ---
 
 ## 🐛 Troubleshooting
 
-**Dashboard shows "LOADING..."?**
-1. Check backend: `http://127.0.0.1:8002/docs`
-2. Check browser console (F12)
-3. Verify API_BASE_URL in constants.ts
+### Build Errors
+```bash
+# Clear Next.js cache
+rm -rf .next
 
-**Block/Unblock not working?**
-1. Check API response in Network tab
-2. Reload Chrome extension after blocking
-3. Verify backend database path
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
 
-**Slow loading?**
-1. Backend might be processing large dataset
-2. Check backend optimization (limit=20)
-3. Clear browser cache
+# Rebuild
+npm run build
+```
 
----
-
-## 📈 Performance Optimizations
-
-### Frontend
-- Polling instead of websockets (simpler)
-- Limited fetch (20 items)
-- Client-side caching
-- Debounced search
-
-### Backend Integration
-- Optimized SQL queries
-- Indexed timestamps
-- Set-based lookups (O(1))
-- Reduced aggregations
+### API Connection Issues
+1. Check backend is running: `http://127.0.0.1:8002/health`
+2. Verify `NEXT_PUBLIC_API_URL` in `.env.local`
+3. Check browser console for CORS errors
 
 ---
 
-## 🎯 Features
+## 📚 Additional Resources
 
-### Current
-✅ Real-time activity monitoring
-✅ Manual block/unblock
-✅ Search & filter
-✅ Risk categorization
-✅ Trend visualization
-
-### Planned
-- Export data (CSV/JSON)
-- Custom date ranges
-- Advanced filtering
-- Email alerts
-- Multi-user support
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [Vercel Deployment](https://vercel.com/docs)
+- [Full Deployment Guide](./DEPLOYMENT.md)
 
 ---
 
-## 🔐 Security
-
-- All data stored locally
-- No external API calls
-- CORS configured for localhost
-- No sensitive data logging
-
----
-
-**See**: [Main README](../README.md) for complete documentation
+**Maintained by:** ClickWise Team  
+**Last Updated:** 2026-08-17

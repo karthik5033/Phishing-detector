@@ -1,6 +1,6 @@
 # 🌐 Chrome Extension Documentation
 
-SecureSentinel Chrome Extension provides real-time phishing protection in your browser.
+ClickWise Chrome Extension provides real-time phishing protection in your browser.
 
 ---
 

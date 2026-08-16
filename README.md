@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/SecureSentinel-v4.0-0ea5e9?style=for-the-badge&logo=shield&logoColor=white" alt="Version"/>
+  <img src="https://img.shields.io/badge/ClickWise-v4.0-0ea5e9?style=for-the-badge&logo=shield&logoColor=white" alt="Version"/>
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
   <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/>
   <img src="https://img.shields.io/badge/Chrome-Extension%20MV3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Extension"/>
@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/License-Educational-green?style=for-the-badge" alt="License"/>
 </p>
 
-<h1 align="center">🛡️ SecureSentinel</h1>
+<h1 align="center">🛡️ ClickWise</h1>
 <h3 align="center">Autonomous AI-Powered Defense Against Phishing & Social Engineering</h3>
 
 <p align="center">
@@ -40,7 +40,7 @@
 
 ## 🌐 Overview
 
-SecureSentinel is a **full-stack AI security platform** that analyzes every website you visit in real-time and assigns a **Risk Score** from 0% (Safe) to 100% (Dangerous). The system operates across three integrated components:
+ClickWise is a **full-stack AI security platform** that analyzes every website you visit in real-time and assigns a **Risk Score** from 0% (Safe) to 100% (Dangerous). The system operates across three integrated components:
 
 | Component | Technology | Role |
 |-----------|-----------|------|
@@ -72,7 +72,7 @@ SecureSentinel is a **full-stack AI security platform** that analyzes every webs
 - ✅ Centralized dashboard with KPIs (total scans, threats blocked, safety score)
 - ✅ 7-day activity trend charts
 - ✅ Manual domain block/unblock with one click
-- ✅ AI-powered chat assistant ("Sentinel AI") for security guidance
+- ✅ AI-powered chat assistant ("ClickWise AI") for security guidance
 - ✅ Privacy settings (PII masking, data retention controls)
 
 ### For Developers
@@ -87,7 +87,7 @@ SecureSentinel is a **full-stack AI security platform** that analyzes every webs
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                          SecureSentinel Architecture                        │
+│                          ClickWise Architecture                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │   ┌──────────────────────┐     HTTP/REST      ┌──────────────────────────┐  │

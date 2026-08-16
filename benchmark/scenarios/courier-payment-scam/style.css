@@ -1,0 +1,382 @@
+/* Courier Payment Scam Demo - Styling */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+/* Demo Warning Banner */
+.demo-warning {
+    background: #ff0000;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    border-bottom: 3px solid #cc0000;
+}
+
+.container {
+    max-width: 700px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    font-size: 32px;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.tracking-id {
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: monospace;
+}
+
+/* Main Content */
+.main-content {
+    padding: 32px;
+}
+
+/* Alert Box - Urgency */
+.alert-box {
+    background: linear-gradient(135deg, #ffd93d 0%, #ffb800 100%);
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 16px rgba(255, 184, 0, 0.3);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.alert-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.alert-title {
+    color: #d32f2f;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.alert-message {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Parcel Info */
+.parcel-info {
+    background: #f8f9fa;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    border: 2px solid #e9ecef;
+}
+
+.parcel-info h2 {
+    color: #495057;
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.info-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.label {
+    font-weight: 600;
+    color: #666;
+    font-size: 14px;
+}
+
+.value {
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-pending {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* Payment Container */
+.payment-container {
+    background: white;
+    padding: 28px;
+    border: 2px solid #ff6b6b;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.payment-container h2 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.payment-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.payment-subtitle strong {
+    color: #ff6b6b;
+    font-size: 18px;
+}
+
+/* Countdown Timer - Fake Urgency */
+.countdown {
+    background: linear-gradient(135deg, #ff6b6b 0%, #d32f2f 100%);
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 24px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.countdown-label {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.countdown-timer {
+    font-size: 28px;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.card-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+/* Amount Display */
+.amount-display {
+    background: #f0f7ff;
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    border: 2px solid #667eea;
+}
+
+.amount-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+}
+
+.amount-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #d32f2f 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(255, 107, 107, 0.5);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Security Badges */
+.security-badges {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.badge {
+    font-size: 12px;
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* Notice Box */
+.notice-box {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.notice-box .small-text {
+    font-size: 12px;
+    color: #856404;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.notice-box strong {
+    color: #d32f2f;
+}
+
+/* Footer */
+.footer {
+    background: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    color: #666;
+    font-size: 13px;
+}
+
+.footer p {
+    margin: 4px 0;
+}
+
+.small-text {
+    font-size: 11px;
+    color: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        border-radius: 12px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-container {
+        padding: 20px;
+    }
+}

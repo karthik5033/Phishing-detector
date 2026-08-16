@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Internet Banking | State Bank of India</title>
+    <meta name="description" content="State Bank of India personal internet banking login secure banking">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- DEMO PAGE - FOR TESTING ONLY -->
+    <div class="demo-warning">
+        ✅ CONTROL TEST PAGE - SIMULATES LEGITIMATE BANKING SITE (SHOULD SCORE LOW RISK)
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-circle">SBI</div>
+                    <div class="logo-text">
+                        <span class="bank-name">State Bank of India</span>
+                        <span class="tagline">The Banker to Every Indian</span>
+                    </div>
+                </div>
+                <nav class="nav">
+                    <a href="#">Personal</a>
+                    <a href="#">Corporate</a>
+                    <a href="#">SME</a>
+                    <a href="#">NRI</a>
+                    <a href="#">Agri</a>
+                </nav>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <aside class="sidebar">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">ATM/Branch Locator</a></li>
+                    <li><a href="#">Interest Rates</a></li>
+                    <li><a href="#">Customer Care</a></li>
+                    <li><a href="#">Schemes</a></li>
+                    <li><a href="#">Apply for Loans</a></li>
+                </ul>
+
+                <div class="info-card">
+                    <h4>Security Tips</h4>
+                    <ul class="security-tips">
+                        <li>Never share your password with anyone</li>
+                        <li>Bank will never ask for OTP via call/email</li>
+                        <li>Always check the website URL</li>
+                        <li>Use strong passwords and change them regularly</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>Customer Support</h4>
+                    <p><strong>Toll Free:</strong> 1800 11 2211</p>
+                    <p><strong>Email:</strong> contact.retail@sbi.co.in</p>
+                    <p class="hours">Available 24x7</p>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="login-card">
+                    <h1>Personal Internet Banking</h1>
+                    <p class="subtitle">Login to access your account</p>
+
+                    <form id="login-form" action="#" method="post" onsubmit="return handleSubmit(event)">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="login-btn">Continue to Login</button>
+                            <a href="#" class="forgot-link">Forgot Password?</a>
+                        </div>
+                    </form>
+
+                    <div class="register-section">
+                        <p>New to Internet Banking?</p>
+                        <a href="#" class="register-link">Register Now</a>
+                    </div>
+
+                    <!-- Clean Security Information -->
+                    <div class="security-notice">
+                        <div class="notice-icon">🔒</div>
+                        <div class="notice-text">
+                            <strong>Your Security Matters</strong>
+                            <p>This is a secure connection. All data is encrypted using 256-bit SSL technology.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Services -->
+                <div class="services-section">
+                    <h2>Popular Services</h2>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <span class="service-icon">💳</span>
+                            <h3>Account Summary</h3>
+                            <p>View balances and transactions</p>
+                        </div>
+                        <div class="service-card">
+                            <span class="service-icon">💸</span>
+                            <h3>Fund Transfer</h3>
+                            <p>NEFT, RTGS, IMPS transfers</p>
+                        </div>
+                        <div class="service-card">
+                            <span class="service-icon">📱</span>
+                            <h3>Mobile Banking</h3>
+                            <p>YONO SBI App</p>
+                        </div>
+                        <div class="service-card">
+                            <span class="service-icon">📄</span>
+                            <h3>Statements</h3>
+                            <p>Download account statements</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About SBI</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press Release</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Policies</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Security Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Help & Support</h4>
+                    <ul>
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Branch Locator</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 State Bank of India. All rights reserved.</p>
+                <p class="disclaimer">Best viewed in Chrome, Firefox, Safari, or Edge browsers at 1024x768 resolution or higher.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Fake form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            alert('✅ DEMO PAGE: This is a mock legitimate banking page for testing ClickWise false positive prevention.');
+            return false;
+        }
+    </script>
+</body>
+</html>

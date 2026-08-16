@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBI - Verify Your Account | KYC Update Required</title>
+    <meta name="description" content="urgent kyc verification required sbi banking login verify account suspended blocked">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- DEMO PAGE - FOR TESTING ONLY -->
+    <div class="demo-warning">
+        ⚠️ DEMO PAGE - CONTROLLED PHISHING SIMULATION FOR TESTING ONLY
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <!-- Fake SBI Logo (Blue Circle) -->
+                <div class="logo-circle">SBI</div>
+                <span class="logo-text">State Bank of India</span>
+            </div>
+            <div class="nav">
+                <a href="#">Personal</a>
+                <a href="#">Corporate</a>
+                <a href="#">NRI</a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Alert Banner (Red Flag: Urgency + Fear) -->
+            <div class="alert-banner">
+                <span class="alert-icon">⚠️</span>
+                <div class="alert-text">
+                    <strong>URGENT: KYC Verification Required</strong>
+                    <p>Your account will be permanently blocked in <strong>24 hours</strong> if you do not complete verification immediately.</p>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <h1 class="form-title">Account Verification Portal</h1>
+                <p class="form-subtitle">Complete your KYC verification to avoid account suspension</p>
+
+                <!-- Phishing Form -->
+                <form id="kyc-form" action="#" method="post" onsubmit="return handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="username">Internet Banking User ID *</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your User ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Login Password *</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your Password" required>
+                        <small class="hint">We will never ask for your password via email or SMS</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="otp">OTP Verification *</label>
+                        <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP sent to your mobile" maxlength="6" required>
+                        <small class="hint">OTP valid for 10 minutes only</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pan">PAN Number *</label>
+                        <input type="text" id="pan" name="pan" placeholder="ABCDE1234F" maxlength="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aadhaar">Aadhaar Number *</label>
+                        <input type="text" id="aadhaar" name="aadhaar" placeholder="1234 5678 9012" maxlength="14" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Verify & Unlock Account</button>
+                </form>
+
+                <!-- Trust Badges (Fake) -->
+                <div class="trust-badges">
+                    <span class="badge">🔒 256-bit Encrypted</span>
+                    <span class="badge">✓ RBI Approved</span>
+                    <span class="badge">✓ Secure Banking</span>
+                </div>
+
+                <!-- Red Flags Embedded in Text -->
+                <div class="footer-notice">
+                    <p><strong>Important Notice:</strong> Failure to verify within 24 hours will result in permanent account closure. Your funds may be frozen pending investigation.</p>
+                    <p class="small-text">This is a mandatory compliance update as per new RBI guidelines. Act now to maintain uninterrupted banking services.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 State Bank of India. All rights reserved.</p>
+            <p class="small-text">For assistance, call our helpline: 1800-XXX-XXXX (Red Flag: Generic number)</p>
+        </footer>
+    </div>
+
+    <script>
+        // Fake form submission (goes nowhere)
+        function handleSubmit(event) {
+            event.preventDefault();
+            alert('🛡️ DEMO PAGE: Form submission blocked. This is a phishing simulation for testing ClickWise.');
+            return false;
+        }
+
+        // Add some dynamic "loading" effect to seem more real
+        window.addEventListener('load', function() {
+            const form = document.getElementById('kyc-form');
+            form.classList.add('loaded');
+        });
+    </script>
+</body>
+</html>

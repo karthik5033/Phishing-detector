@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Pending - Payment Required | Express Courier</title>
+    <meta name="description" content="urgent delivery payment required reschedule parcel courier delivery fee">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- DEMO PAGE - FOR TESTING ONLY -->
+    <div class="demo-warning">
+        ⚠️ DEMO PAGE - CONTROLLED PHISHING SIMULATION FOR TESTING ONLY
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📦</div>
+                <span class="logo-text">ExpressCourier</span>
+            </div>
+            <div class="tracking-id">Tracking ID: EC458392047IN</div>
+        </header>
+
+        <main class="main-content">
+            <!-- Urgent Alert -->
+            <div class="alert-box">
+                <div class="alert-icon">⏰</div>
+                <h1 class="alert-title">Delivery Pending - Action Required</h1>
+                <p class="alert-message">Your parcel delivery has been held due to incomplete address. Pay the rescheduling fee to receive your package today.</p>
+            </div>
+
+            <!-- Parcel Info -->
+            <div class="parcel-info">
+                <h2>📦 Parcel Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Tracking Number:</span>
+                        <span class="value">EC458392047IN</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Status:</span>
+                        <span class="value status-pending">Pending Payment</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Delivery Address:</span>
+                        <span class="value">Your Location (Incomplete)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Estimated Delivery:</span>
+                        <span class="value">Today (if paid within 2 hours)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="payment-container">
+                <h2>💳 Complete Payment</h2>
+                <p class="payment-subtitle">Pay the rescheduling fee of <strong>₹25</strong> to confirm delivery</p>
+
+                <!-- Countdown Timer (Fake Urgency) -->
+                <div class="countdown">
+                    <span class="countdown-label">⏱️ Time Remaining:</span>
+                    <span class="countdown-timer" id="timer">01:59:45</span>
+                </div>
+
+                <form id="payment-form" action="#" method="post" onsubmit="return handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="card-name">Cardholder Name *</label>
+                        <input type="text" id="card-name" name="card-name" placeholder="Name on Card" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="card-number">Card Number *</label>
+                        <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <div class="card-icons">
+                            <span>💳 Visa</span>
+                            <span>💳 Mastercard</span>
+                            <span>💳 Rupay</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiry">Expiry Date *</label>
+                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV *</label>
+                            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <div class="amount-display">
+                        <span class="amount-label">Amount to Pay:</span>
+                        <span class="amount-value">₹25.00</span>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        🔒 Pay ₹25 & Confirm Delivery
+                    </button>
+                </form>
+
+                <!-- Fake Security Badges -->
+                <div class="security-badges">
+                    <span class="badge">🔒 SSL Secured</span>
+                    <span class="badge">✓ PCI Compliant</span>
+                    <span class="badge">✓ Safe Payment</span>
+                </div>
+            </div>
+
+            <!-- Red Flags in Small Print -->
+            <div class="notice-box">
+                <p class="small-text"><strong>Important:</strong> If payment is not received within 2 hours, your parcel will be returned to sender and a return fee of ₹500 will be charged to you.</p>
+                <p class="small-text">This is a one-time administrative fee mandated by courier regulations. Failure to pay will result in legal action.</p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 ExpressCourier Services. All rights reserved.</p>
+            <p class="small-text">Customer Support: support@expresscourier-india.net (Red Flag: Suspicious domain)</p>
+        </footer>
+    </div>
+
+    <script>
+        // Fake form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            alert('🛡️ DEMO PAGE: Payment blocked. This is a phishing simulation for testing ClickWise.');
+            return false;
+        }
+
+        // Fake countdown timer
+        function updateTimer() {
+            const timerEl = document.getElementById('timer');
+            let totalSeconds = 7185; // 1:59:45
+
+            setInterval(() => {
+                totalSeconds--;
+                if (totalSeconds < 0) totalSeconds = 7200;
+
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                timerEl.textContent = 
+                    String(hours).padStart(2, '0') + ':' + 
+                    String(minutes).padStart(2, '0') + ':' + 
+                    String(seconds).padStart(2, '0');
+            }, 1000);
+        }
+
+        // Format card number input
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Format expiry date
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        window.addEventListener('load', updateTimer);
+    </script>
+</body>
+</html>

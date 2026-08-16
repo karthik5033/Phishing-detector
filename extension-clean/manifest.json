@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "SecureSentinel",
+  "name": "ClickWise",
   "version": "3.0.0",
   "description": "Real-time phishing and social engineering detection with automatic blocking",
   "permissions": [
@@ -18,7 +18,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "SecureSentinel - Click to view stats"
+    "default_title": "ClickWise - Click to view stats"
   },
   "background": {
     "service_worker": "src/background/service-worker.js",

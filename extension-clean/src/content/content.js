@@ -1,9 +1,9 @@
 /**
- * SecureSentinel Content Script v2.1
+ * ClickWise Content Script v2.1
  * Enhanced with interactive risk popup
  */
 
-console.log("%c[SecureSentinel] Content Script v3.1 Active", "color: #10b981; font-weight: bold");
+console.log("%c[ClickWise] Content Script v3.1 Active", "color: #10b981; font-weight: bold");
 
 // Track processed links
 const processed = new Set();
@@ -32,7 +32,7 @@ function createRiskPopup(data, badge) {
     }
     
     const popup = document.createElement("div");
-    popup.className = "sentinel-popup";
+    popup.className = "clickwise-popup";
     popup.style.cssText = `
         position: absolute;
         z-index: 999999;
@@ -53,15 +53,15 @@ function createRiskPopup(data, badge) {
                 from { opacity: 0; transform: translateY(-10px); }
                 to { opacity: 1; transform: translateY(0); }
             }
-            .sentinel-popup * { margin: 0; padding: 0; box-sizing: border-box; }
+            .clickwise-popup * { margin: 0; padding: 0; box-sizing: border-box; }
         </style>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div style="width: 8px; height: 8px; background: ${riskColor}; border-radius: 50%; box-shadow: 0 0 8px ${riskColor};"></div>
-                <span style="color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SecureSentinel</span>
+                <span style="color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">ClickWise</span>
             </div>
-            <button onclick="this.closest('.sentinel-popup').style.display='none'" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 18px; padding: 0; width: 20px; height: 20px; line-height: 1;">×</button>
+            <button onclick="this.closest('.clickwise-popup').style.display='none'" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 18px; padding: 0; width: 20px; height: 20px; line-height: 1;">×</button>
         </div>
         
         <div style="background: linear-gradient(135deg, ${riskColor}20, ${riskColor}10); border-left: 3px solid ${riskColor}; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
@@ -116,7 +116,7 @@ function positionPopup(popup, badge) {
  */
 function addBadge(link, data) {
     // Avoid duplicates
-    if (link.querySelector(".sentinel-badge")) return;
+    if (link.querySelector(".clickwise-badge")) return;
     
     const score = parseFloat(data.max_risk_score) || 0;
     let color, label;
@@ -134,7 +134,7 @@ function addBadge(link, data) {
     
     // Create badge container
     const container = document.createElement("span");
-    container.className = "sentinel-badge-container";
+    container.className = "clickwise-badge-container";
     container.style.cssText = `
         display: inline-block;
         position: relative;
@@ -144,7 +144,7 @@ function addBadge(link, data) {
     
     // Create badge
     const badge = document.createElement("span");
-    badge.className = "sentinel-badge";
+    badge.className = "clickwise-badge";
     badge.style.cssText = `
         display: inline-block;
         width: 10px;
@@ -171,7 +171,7 @@ function addBadge(link, data) {
         e.stopPropagation();
         
         // Hide all other popups
-        document.querySelectorAll('.sentinel-popup').forEach(p => {
+        document.querySelectorAll('.clickwise-popup').forEach(p => {
             if (p !== popup) p.style.display = 'none';
         });
         
@@ -212,7 +212,7 @@ function addBadge(link, data) {
         link.appendChild(container);
     }
     
-    console.log(`[SecureSentinel] Badge added for: ${link.href} (${Math.round(score * 100)}%)`);
+    console.log(`[ClickWise] Badge added for: ${link.href} (${Math.round(score * 100)}%)`);
 }
 
 // Cache for API results to avoid duplicate requests
@@ -234,7 +234,7 @@ async function scanLink(link) {
     }
 
     // Skip if this specific ELEMENT already has a badge
-    if (link.querySelector(".sentinel-badge") || link.getAttribute("data-sentinel-processed")) {
+    if (link.querySelector(".clickwise-badge") || link.getAttribute("data-clickwise-processed")) {
         return;
     }
     
@@ -259,7 +259,7 @@ async function scanLink(link) {
             resultsCache.set(url, response.data);
             addBadge(link, response.data);
         } else {
-            console.warn("[SecureSentinel] Scan empty response for:", url);
+            console.warn("[ClickWise] Scan empty response for:", url);
             processed.delete(url); // Allow retry later
             
             // One-time retry
@@ -275,7 +275,7 @@ async function scanLink(link) {
             }, 2000);
         }
     } catch (error) {
-        console.error("[SecureSentinel] Scan failure:", error);
+        console.error("[ClickWise] Scan failure:", error);
         processed.delete(url);
     }
 }
@@ -304,8 +304,8 @@ function scanAllLinks() {
 
 // Close popups when clicking outside
 document.addEventListener('click', (e) => {
-    if (!e.target.closest('.sentinel-badge') && !e.target.closest('.sentinel-popup')) {
-        document.querySelectorAll('.sentinel-popup').forEach(p => p.style.display = 'none');
+    if (!e.target.closest('.clickwise-badge') && !e.target.closest('.clickwise-popup')) {
+        document.querySelectorAll('.clickwise-popup').forEach(p => p.style.display = 'none');
     }
 });
 
@@ -326,7 +326,7 @@ observer.observe(document.body, {
     subtree: true
 });
 
-console.log("[SecureSentinel] Monitoring active");
+console.log("[ClickWise] Monitoring active");
 
 // Listen for forced scans from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

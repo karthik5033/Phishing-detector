@@ -1,10 +1,10 @@
 /**
- * SecureSentinel Service Worker v3.0
+ * ClickWise Service Worker v3.0
  * Real-time blocking enabled
  */
 
 const API_BASE = "http://127.0.0.1:8002/api/v1";
-console.log("[SecureSentinel] Service Worker v3.1 - Build: 2025-03-17");
+console.log("[ClickWise] Service Worker v3.1 - Build: 2025-03-17");
 
 // Cache for analyzed URLs
 const cache = new Map();
@@ -36,7 +36,7 @@ async function syncBlocklist() {
         
         if (response.ok) {
             const data = await response.json();
-            console.log("[SecureSentinel] 📥 Received blocklist data:", data);
+            console.log("[ClickWise] 📥 Received blocklist data:", data);
             
             permanentBlocklist.clear();
             
@@ -44,13 +44,13 @@ async function syncBlocklist() {
                 data.domains.forEach(item => {
                     permanentBlocklist.add(item.domain.toLowerCase().trim()); // Normalize
                 });
-                console.log(`[SecureSentinel] 📋 Synced ${permanentBlocklist.size} permanently blocked domains:`, Array.from(permanentBlocklist));
+                console.log(`[ClickWise] 📋 Synced ${permanentBlocklist.size} permanently blocked domains:`, Array.from(permanentBlocklist));
             }
         } else {
-             console.error(`[SecureSentinel] ❌ Blocklist sync failed: ${response.status}`);
+             console.error(`[ClickWise] ❌ Blocklist sync failed: ${response.status}`);
         }
     } catch (error) {
-        console.error("[SecureSentinel] ❌ Failed to sync blocklist (Network Error):", error);
+        console.error("[ClickWise] ❌ Failed to sync blocklist (Network Error):", error);
     }
 }
 
@@ -62,16 +62,16 @@ function isPermanentlyBlocked(url) {
         const urlObj = new URL(url);
         const domain = urlObj.hostname.toLowerCase(); // Normalize
         
-        console.log(`[SecureSentinel] 🔍 Checking: ${domain} (Blocklist size: ${permanentBlocklist.size})`);
+        console.log(`[ClickWise] 🔍 Checking: ${domain} (Blocklist size: ${permanentBlocklist.size})`);
         
         // Debug: Log first 5 items if list is small or debugging
         if (permanentBlocklist.size > 0 && permanentBlocklist.size < 10) {
-             console.log("[SecureSentinel] Blocklist content:", Array.from(permanentBlocklist));
+             console.log("[ClickWise] Blocklist content:", Array.from(permanentBlocklist));
         }
 
         // Check exact match
         if (permanentBlocklist.has(domain)) {
-            console.log(`[SecureSentinel] 🚫 EXACT MATCH found for: ${domain}`);
+            console.log(`[ClickWise] 🚫 EXACT MATCH found for: ${domain}`);
             return true;
         }
         
@@ -110,18 +110,18 @@ async function checkBackend() {
             cache: "no-cache"
         });
         if (res.ok) {
-            console.log("[SecureSentinel] ✅ Backend online");
+            console.log("[ClickWise] ✅ Backend online");
             return true;
         }
     } catch (err) {
-        console.warn("[SecureSentinel] ⚠️ Backend offline - start with: python start_server.py");
+        console.warn("[ClickWise] ⚠️ Backend offline - start with: python start_server.py");
     }
     return false;
 }
 
 // Check backend on install/startup
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("[SecureSentinel] Extension installed");
+    console.log("[ClickWise] Extension installed");
     checkBackend();
     syncBlocklist(); // Sync blocklist on install
 });
@@ -144,7 +144,7 @@ async function analyzeURL(url, isMainFrame = false) {
     }
 
     try {
-        console.log(`[SecureSentinel] 🚀 Analyzing: ${url.substring(0, 50)}...`);
+        console.log(`[ClickWise] 🚀 Analyzing: ${url.substring(0, 50)}...`);
         const response = await fetch(`${API_BASE}/detect`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -156,7 +156,7 @@ async function analyzeURL(url, isMainFrame = false) {
         }
 
         const data = await response.json();
-        console.log(`[SecureSentinel] 📉 Result for ${url.substring(0, 30)}: ${Math.round(data.max_risk_score * 100)}%`);
+        console.log(`[ClickWise] 📉 Result for ${url.substring(0, 30)}: ${Math.round(data.max_risk_score * 100)}%`);
         
         // Cache result
         cache.set(url, {
@@ -175,7 +175,7 @@ async function analyzeURL(url, isMainFrame = false) {
 
         return data;
     } catch (error) {
-        console.error("[SecureSentinel] API Error:", error.message);
+        console.error("[ClickWise] API Error:", error.message);
         // Return safe default on error
         return {
             max_risk_score: 0,
@@ -190,7 +190,7 @@ async function analyzeURL(url, isMainFrame = false) {
  */
 async function analyzeDialog(text, dialogType, url) {
     try {
-        console.log(`[SecureSentinel] 🔔 Analyzing ${dialogType}: ${text.substring(0, 50)}...`);
+        console.log(`[ClickWise] 🔔 Analyzing ${dialogType}: ${text.substring(0, 50)}...`);
         
         // Try the new dedicated temporal analysis endpoint first
         try {
@@ -206,7 +206,7 @@ async function analyzeDialog(text, dialogType, url) {
 
             if (temporalResponse.ok) {
                 const temporalData = await temporalResponse.json();
-                console.log(`[SecureSentinel] 📊 Temporal analysis: ${Math.round(temporalData.risk_score * 100)}%, ${temporalData.triggers.length} triggers`);
+                console.log(`[ClickWise] 📊 Temporal analysis: ${Math.round(temporalData.risk_score * 100)}%, ${temporalData.triggers.length} triggers`);
                 
                 // Update stats
                 await updateStats(url || 'dialog', temporalData.risk_score, false);
@@ -220,7 +220,7 @@ async function analyzeDialog(text, dialogType, url) {
                 };
             }
         } catch (temporalError) {
-            console.warn("[SecureSentinel] Temporal endpoint failed, falling back to detect:", temporalError.message);
+            console.warn("[ClickWise] Temporal endpoint failed, falling back to detect:", temporalError.message);
         }
         
         // Fallback to the old /detect endpoint
@@ -260,7 +260,7 @@ async function analyzeDialog(text, dialogType, url) {
         // Sort by position (temporal order)
         triggers.sort((a, b) => a.position - b.position);
         
-        console.log(`[SecureSentinel] 📊 Dialog analysis (fallback): ${Math.round(data.max_risk_score * 100)}%, ${triggers.length} triggers`);
+        console.log(`[ClickWise] 📊 Dialog analysis (fallback): ${Math.round(data.max_risk_score * 100)}%, ${triggers.length} triggers`);
         
         // Update stats
         await updateStats(url || 'dialog', data.max_risk_score, false);
@@ -272,7 +272,7 @@ async function analyzeDialog(text, dialogType, url) {
             dialogType: dialogType
         };
     } catch (error) {
-        console.error("[SecureSentinel] Dialog analysis error:", error.message);
+        console.error("[ClickWise] Dialog analysis error:", error.message);
         return {
             riskScore: 0,
             triggers: [],
@@ -330,7 +330,7 @@ async function updateStats(url, riskScore, isMainFrame) {
             recentScans
         });
     } catch (error) {
-        console.error("[SecureSentinel] Stats update failed:", error);
+        console.error("[ClickWise] Stats update failed:", error);
     }
 }
 
@@ -358,20 +358,20 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     
     // Check if URL is whitelisted
     if (tempWhitelist.has(url)) {
-        console.log("[SecureSentinel] ✅ Whitelisted:", url);
+        console.log("[ClickWise] ✅ Whitelisted:", url);
         return;
     }
     
     // Get settings
     const settings = await getSettings();
     if (!settings.blockingEnabled) {
-        console.log("[SecureSentinel] ⏸️ Blocking disabled");
+        console.log("[ClickWise] ⏸️ Blocking disabled");
         return;
     }
     
     // PRIORITY 1: Check permanent blocklist (instant block, no API call needed)
     if (isPermanentlyBlocked(url)) {
-        console.log("[SecureSentinel] 🚫 PERMANENTLY BLOCKED:", url);
+        console.log("[ClickWise] 🚫 PERMANENTLY BLOCKED:", url);
         
         // Redirect to blocking page with permanent block indicator
         const blockedPageUrl = chrome.runtime.getURL('blocked.html') +
@@ -387,12 +387,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     }
     
     // PRIORITY 2: Analyze URL with AI model
-    console.log("[SecureSentinel] 🔍 Analyzing navigation:", url);
+    console.log("[ClickWise] 🔍 Analyzing navigation:", url);
     const analysis = await analyzeURL(url, true);
     
     // Check if should block based on risk score
     if (analysis.max_risk_score >= settings.blockThreshold) {
-        console.log("[SecureSentinel] 🛑 BLOCKING:", url, "Risk:", analysis.max_risk_score);
+        console.log("[ClickWise] 🛑 BLOCKING:", url, "Risk:", analysis.max_risk_score);
         
         // Redirect to blocking page
         const blockedPageUrl = chrome.runtime.getURL('blocked.html') +
@@ -402,7 +402,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         
         chrome.tabs.update(tabId, { url: blockedPageUrl });
     } else {
-        console.log("[SecureSentinel] ✅ Safe:", url, "Risk:", analysis.max_risk_score);
+        console.log("[ClickWise] ✅ Safe:", url, "Risk:", analysis.max_risk_score);
     }
 });
 
@@ -428,21 +428,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "WHITELIST_TEMP") {
         // Add URL to temporary whitelist
         tempWhitelist.add(message.url);
-        console.log("[SecureSentinel] ➕ Whitelisted:", message.url);
+        console.log("[ClickWise] ➕ Whitelisted:", message.url);
         sendResponse({ success: true });
         return false;
     }
     
     if (message.type === "LOG_BLOCKED") {
         // Log blocked attempt
-        console.log("[SecureSentinel] 📝 Logged block:", message.url);
+        console.log("[ClickWise] 📝 Logged block:", message.url);
         sendResponse({ success: true });
         return false;
     }
     
     if (message.type === "REPORT_FALSE_POSITIVE") {
         // Handle false positive report
-        console.log("[SecureSentinel] 📢 False positive reported:", message.url);
+        console.log("[ClickWise] 📢 False positive reported:", message.url);
         // Could send to backend for retraining
         sendResponse({ success: true });
         return false;
@@ -451,10 +451,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     if (message.type === "SYNC_BLOCKLIST") {
         // Force immediate blocklist sync
-        console.log("[SecureSentinel] 🔄 Force syncing blocklist...");
+        console.log("[ClickWise] 🔄 Force syncing blocklist...");
         syncBlocklist()
             .then(() => {
-                console.log("[SecureSentinel] ✅ Blocklist synced. Current size:", permanentBlocklist.size);
+                console.log("[ClickWise] ✅ Blocklist synced. Current size:", permanentBlocklist.size);
                 sendResponse({ 
                     success: true, 
                     count: permanentBlocklist.size,
@@ -473,4 +473,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-console.log("[SecureSentinel] Service Worker ready - Blocking enabled");
+console.log("[ClickWise] Service Worker ready - Blocking enabled");

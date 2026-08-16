@@ -1,6 +1,6 @@
 # 🔧 Backend Documentation
 
-The SecureSentinel backend is a FastAPI-powered REST API that provides real-time phishing and social engineering detection.
+The ClickWise backend is a FastAPI-powered REST API that provides real-time phishing and social engineering detection.
 
 ---
 

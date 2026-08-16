@@ -179,4 +179,4 @@ chrome.runtime.sendMessage({
     timestamp: Date.now()
 });
 
-console.log('[SecureSentinel] Blocked page loaded for:', blockedUrl, 'Risk:', riskScore);
+console.log('[ClickWise] Blocked page loaded for:', blockedUrl, 'Risk:', riskScore);

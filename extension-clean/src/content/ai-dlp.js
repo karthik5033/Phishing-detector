@@ -1,5 +1,5 @@
 /**
- * SecureSentinel AI DLP (Data Loss Prevention)
+ * ClickWise AI DLP (Data Loss Prevention)
  * Monitors user input on AI chat platforms (ChatGPT, Gemini, Claude)
  * and warns if sensitive/PII data is about to be shared.
  * Runs at document_start on AI chat sites only.
@@ -8,8 +8,8 @@
 (function () {
     "use strict";
 
-    if (window.__sentinelAiDlpActive) return;
-    window.__sentinelAiDlpActive = true;
+    if (window.__clickwiseAiDlpActive) return;
+    window.__clickwiseAiDlpActive = true;
 
     // Patterns that indicate sensitive/PII data
     const PII_PATTERNS = [
@@ -45,7 +45,7 @@
         if (detections.length > 0) {
             lastWarned = now;
             console.warn(
-                `%c[SecureSentinel DLP] ⚠️ Sensitive data detected: ${detections.join(", ")}`,
+                `%c[ClickWise DLP] ⚠️ Sensitive data detected: ${detections.join(", ")}`,
                 "color: #f59e0b; font-weight: bold; font-size: 12px"
             );
 
@@ -59,11 +59,11 @@
      */
     function showWarningBanner(detections) {
         // Remove any existing banner
-        const existing = document.getElementById("sentinel-dlp-banner");
+        const existing = document.getElementById("clickwise-dlp-banner");
         if (existing) existing.remove();
 
         const banner = document.createElement("div");
-        banner.id = "sentinel-dlp-banner";
+        banner.id = "clickwise-dlp-banner";
         banner.style.cssText = `
             position: fixed;
             top: 0;
@@ -86,9 +86,9 @@
         banner.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 16px;">🛡️</span>
-                <span><b>SecureSentinel DLP:</b> Detected <b>${detections.join(", ")}</b> in your input. Be careful sharing sensitive data with AI services.</span>
+                <span><b>ClickWise DLP:</b> Detected <b>${detections.join(", ")}</b> in your input. Be careful sharing sensitive data with AI services.</span>
             </div>
-            <button id="sentinel-dlp-dismiss" style="
+            <button id="clickwise-dlp-dismiss" style="
                 background: transparent;
                 border: 1px solid #475569;
                 color: #94a3b8;
@@ -102,7 +102,7 @@
 
         document.body.prepend(banner);
 
-        document.getElementById("sentinel-dlp-dismiss").addEventListener("click", () => {
+        document.getElementById("clickwise-dlp-dismiss").addEventListener("click", () => {
             banner.remove();
         });
 
@@ -138,5 +138,5 @@
         attachInputMonitors();
     }
 
-    console.log("%c[SecureSentinel] AI DLP Monitor Active", "color: #10b981; font-size: 10px");
+    console.log("%c[ClickWise] AI DLP Monitor Active", "color: #10b981; font-size: 10px");
 })();

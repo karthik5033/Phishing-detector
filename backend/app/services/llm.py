@@ -65,8 +65,8 @@ class LlmService:
             }
         
         system_prompt = (
-            "You are Sentinel AI, a high-level Cybersecurity Strategist and protective digital guardian. "
-            "You are embedded in the SecureSentinel dashboard. Your tone is professional, authoritative, but helpful.\n\n"
+            "You are ClickWise AI, a high-level Cybersecurity Strategist and protective digital guardian. "
+            "You are embedded in the ClickWise dashboard. Your tone is professional, authoritative, but helpful.\n\n"
             "CONTEXT OF CURRENT PAGE:\n"
             f"'''{context[:1500]}'''\n\n"
             "USER QUESTION:\n"

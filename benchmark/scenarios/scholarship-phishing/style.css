@@ -1,0 +1,425 @@
+/* Scholarship Phishing Demo - Styling */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+/* Demo Warning Banner */
+.demo-warning {
+    background: #ff0000;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    border-bottom: 3px solid #cc0000;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* Header - Academic Theme */
+.header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: white;
+    padding: 32px;
+    border-bottom: 6px solid #fbbf24;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Fake University Seal */
+.seal-circle {
+    width: 80px;
+    height: 80px;
+    border: 4px solid #fbbf24;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+.seal-inner {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #1e3a8a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seal-year {
+    font-size: 10px;
+    font-weight: bold;
+    color: #1e3a8a;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.header-text h1 {
+    font-size: 26px;
+    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.header-text p {
+    font-size: 14px;
+    opacity: 0.9;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Main Content */
+.main-content {
+    padding: 40px;
+}
+
+/* Congratulations Banner */
+.congrats-banner {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 32px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.banner-icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+}
+
+.congrats-banner h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.congrats-banner p {
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.95;
+}
+
+/* Urgent Notice - Red Flag */
+.urgent-notice {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.notice-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.notice-icon {
+    font-size: 24px;
+}
+
+.notice-header strong {
+    font-size: 16px;
+    color: #d97706;
+}
+
+.urgent-notice p {
+    font-size: 14px;
+    color: #78350f;
+    line-height: 1.6;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Form Container */
+.form-container {
+    background: #f9fafb;
+    padding: 32px;
+    border-radius: 12px;
+    border: 2px solid #1e3a8a;
+    margin-bottom: 32px;
+}
+
+.form-container h3 {
+    color: #1e3a8a;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.form-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 32px;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h4 {
+    color: #1e40af;
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #fbbf24;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.hint {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 6px;
+    font-style: italic;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: flex;
+    gap: 12px;
+    margin: 24px 0;
+    padding: 16px;
+    background: #fffbeb;
+    border-radius: 8px;
+    border: 1px solid #fbbf24;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Arial', sans-serif;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Trust Section */
+.trust-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.trust-badge {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 600;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Info Box */
+.info-box {
+    background: #eff6ff;
+    border-left: 4px solid #1e40af;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.info-box h4 {
+    color: #1e3a8a;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.info-box ul {
+    list-style-position: inside;
+    margin-bottom: 16px;
+}
+
+.info-box li {
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+    font-family: 'Arial', sans-serif;
+}
+
+.warning-text {
+    font-size: 13px;
+    color: #dc2626;
+    line-height: 1.6;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Contact Box */
+.contact-box {
+    background: #f3f4f6;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.contact-box p {
+    font-size: 14px;
+    color: #374151;
+    margin: 8px 0;
+}
+
+.contact-box strong {
+    color: #1e3a8a;
+}
+
+/* Footer */
+.footer {
+    background: #1e3a8a;
+    color: white;
+    padding: 24px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.footer p {
+    font-size: 13px;
+    margin: 4px 0;
+}
+
+.disclaimer {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 8px;
+}
+
+/* Loading Animation */
+#scholarship-form {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-in forwards;
+}
+
+#scholarship-form.loaded {
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+    }
+
+    .main-content {
+        padding: 24px;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-text h1 {
+        font-size: 20px;
+    }
+
+    .congrats-banner h2 {
+        font-size: 20px;
+    }
+}

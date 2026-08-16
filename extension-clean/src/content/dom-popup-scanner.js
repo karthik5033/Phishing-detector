@@ -1,5 +1,5 @@
 /**
- * SecureSentinel DOM Popup Scanner
+ * ClickWise DOM Popup Scanner
  * Scans for suspicious DOM-based popups, overlays, and fake notification bars
  * that mimic browser UI (e.g., fake "Your computer is infected!" banners).
  * Runs at document_idle (after page fully loads).
@@ -8,8 +8,8 @@
 (function () {
     "use strict";
 
-    if (window.__sentinelDomPopupScannerActive) return;
-    window.__sentinelDomPopupScannerActive = true;
+    if (window.__clickwiseDomPopupScannerActive) return;
+    window.__clickwiseDomPopupScannerActive = true;
 
     // Suspicious text patterns commonly found in scam popups
     const SUSPICIOUS_PATTERNS = [
@@ -56,15 +56,15 @@
         );
 
         candidates.forEach(el => {
-            if (el.dataset.sentinelScanned) return;
-            el.dataset.sentinelScanned = "true";
+            if (el.dataset.clickwiseScanned) return;
+            el.dataset.clickwiseScanned = "true";
 
             if (!isSuspiciousOverlay(el)) return;
 
             const text = (el.innerText || "").trim();
             if (matchesSuspiciousPattern(text)) {
                 console.warn(
-                    "%c[SecureSentinel] ⚠️ Suspicious DOM popup detected!",
+                    "%c[ClickWise] ⚠️ Suspicious DOM popup detected!",
                     "color: #ef4444; font-weight: bold",
                     text.substring(0, 100)
                 );
@@ -97,5 +97,5 @@
         subtree: true
     });
 
-    console.log("%c[SecureSentinel] DOM Popup Scanner Active", "color: #10b981; font-size: 10px");
+    console.log("%c[ClickWise] DOM Popup Scanner Active", "color: #10b981; font-size: 10px");
 })();

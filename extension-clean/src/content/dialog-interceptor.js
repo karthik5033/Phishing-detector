@@ -1,5 +1,5 @@
 /**
- * SecureSentinel Dialog Interceptor
+ * ClickWise Dialog Interceptor
  * Intercepts alert(), confirm(), prompt() dialogs and analyzes their content
  * for social engineering / phishing patterns.
  * Runs at document_start to override native dialog methods before page scripts execute.
@@ -9,8 +9,8 @@
     "use strict";
 
     // Avoid double-injection
-    if (window.__sentinelDialogInterceptorActive) return;
-    window.__sentinelDialogInterceptorActive = true;
+    if (window.__clickwiseDialogInterceptorActive) return;
+    window.__clickwiseDialogInterceptorActive = true;
 
     // Store originals
     const _alert = window.alert.bind(window);
@@ -33,7 +33,7 @@
                 if (chrome.runtime.lastError) return;
                 if (response && response.riskScore > 0.6) {
                     console.warn(
-                        `%c[SecureSentinel] ⚠️ Suspicious ${dialogType} detected! Risk: ${Math.round(response.riskScore * 100)}%`,
+                        `%c[ClickWise] ⚠️ Suspicious ${dialogType} detected! Risk: ${Math.round(response.riskScore * 100)}%`,
                         "color: #ef4444; font-weight: bold"
                     );
                 }
@@ -61,5 +61,5 @@
         return _prompt(message, defaultValue);
     };
 
-    console.log("%c[SecureSentinel] Dialog Interceptor Active", "color: #10b981; font-size: 10px");
+    console.log("%c[ClickWise] Dialog Interceptor Active", "color: #10b981; font-size: 10px");
 })();

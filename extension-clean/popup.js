@@ -1,5 +1,5 @@
 /**
- * SecureSentinel Popup Controller
+ * ClickWise Popup Controller
  * Monochrome Professional Edition
  */
 

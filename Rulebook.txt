@@ -1,0 +1,280 @@
+Everything below this line, under "PROMPT FOR CLAUDE OPUS 4.6," is your
+standing rulebook for this planning task. Treat it as a persistent
+reference, not a single instruction to execute in one pass. Do not attempt
+to produce all documents in one response — you will run out of context and
+produce shallow, inconsistent output. Work through it sequentially instead.
+
+Follow this execution protocol:
+
+1. **One deliverable per turn.** The deliverables, in strict order, are:
+   Step 0 (codebase scan + delta list) → Step 1 (file layout decision) →
+   Step 2 (Main PRD) → Step 3 (System Design) → Step 4, one sub-PRD at a
+   time in the order listed (8 separate turns) → Step 5 (fix list) →
+   Step 6 (coordination rules). That's 13 turns total. Do not skip ahead.
+
+2. **Stop and wait after each deliverable.** After you finish one step,
+   stop. Do not proceed to the next step until I explicitly say "continue"
+   or "next." Give me a short summary (3-5 lines) of what you produced and
+   flag anything you were unsure about or had to assume.
+
+3. **Don't re-read or re-paste earlier outputs from scratch.** Once a
+   document is written to disk, reference it by file path in later steps
+   instead of repeating its content back into context. If you need to
+   check something from an earlier doc (e.g. the glossary while writing a
+   sub-PRD), open that specific file and read only the relevant section —
+   don't reload the whole conversation history.
+
+4. **Step 0 is non-negotiable and comes first, always.** Do not write Main
+   PRD or System Design before you've actually walked the codebase and
+   produced the EXISTS / PARTIALLY EXISTS / DOES NOT EXIST delta list. If
+   you're unsure whether something exists, say so explicitly rather than
+   guessing — I'd rather you ask me than hallucinate architecture.
+
+5. **System Design (Step 3) is a hard gate.** Do not start any sub-PRD
+   (Step 4) until Step 3 is fully written and I've confirmed it. Sub-PRDs
+   depend on the glossary and contracts being locked first — writing them
+   in parallel with System Design defeats the whole point of this exercise.
+
+6. **Within Step 4, sub-PRDs can go in any order I ask for**, but still one
+   at a time. If I say "do Investigation Agent next," skip ahead in the
+   list, but still stop after that single sub-PRD.
+
+7. **If a step is large, chunk it further and tell me.** E.g. if System
+   Design is too big for one turn, say so and propose splitting it into
+   "glossary + module map" then "data contracts" then "risk tiers + state
+   machine" as separate turns — don't silently truncate content to fit.
+
+8. **Never touch actual application code during this whole process.**
+   Everything produced here is planning documentation and the Step 5 fix
+   list only, per the rulebook. If you notice something in the code that
+   needs fixing while scanning it in Step 0, note it for Step 5 — don't
+   fix it now.
+
+Confirm you understand this protocol, then begin with Step 0 only.
+
+You are acting as the technical planning lead for SecureSentinel, an existing
+phishing-detection project that is being extended into an autonomous
+investigation-and-correction system for Smart India Hackathon (SIH). Six
+people will work in parallel off the documents you are about to produce, so
+your #1 job is CONSISTENCY, not creativity. Every doc you write must use the
+same names for the same things. Where you invent a name (a module, a field,
+an endpoint), write it down once, in the System Design doc's glossary, and
+reuse it verbatim everywhere else.
+
+=====================================================================
+STEP 0 — GROUND YOURSELF BEFORE WRITING ANYTHING
+=====================================================================
+Do not start writing docs yet. First:
+
+1. Scan the actual codebase (not just any README) — walk the real directory
+   tree, open the real entrypoints, confirm ports, confirm what's dead code
+   vs live code. Treat any existing present_state.md / README as a *claim*
+   to verify against the source, not ground truth — it may be stale.
+2. Read the three source documents you'll find in the repo (idea.md,
+   idea_v1.txt, and the PDF proposal — locate them yourself; if they aren't
+   in an obvious docs/ folder, search the repo root and any uploads folder).
+   These describe the NEW automation layer (Investigation Agent, Correct
+   Path, Policy Engine, Intent Inference) that does NOT exist in the code yet.
+3. Produce a short internal delta list (this becomes part of your output,
+   see System Design §"Current vs Target State"): for every capability in
+   the source docs, mark it EXISTS / PARTIALLY EXISTS / DOES NOT EXIST,
+   citing the actual file/line where it exists if it does.
+
+Do not hallucinate existing infrastructure. If something in idea.md sounds
+like it's already built but you can't find it in the code, mark it DOES NOT
+EXIST. This delta list is the single most important artifact for preventing
+scope confusion across 6 contributors.
+
+=====================================================================
+STEP 1 — DECIDE FILE LAYOUT
+=====================================================================
+Choose a docs/ structure yourself and state it explicitly at the top of your
+output (e.g. docs/planning/00-main-prd.md, docs/planning/01-system-design.md,
+docs/planning/prds/02-detection-ml.md, etc.). Whatever you choose, use it
+consistently and cross-link between documents using relative paths, not
+descriptions ("see System Design §4" is not enough — give the actual path).
+
+=====================================================================
+STEP 2 — WRITE THE MAIN PRD (one doc, directional, ~2-3 pages)
+=====================================================================
+Audience: anyone on the team or a judge, in 10 minutes, no code literacy
+required. Include:
+- Problem statement (one paragraph, no hedging)
+- Who this protects (keep this tight — 2-3 personas max, not a marketing list)
+- The core loop: Detect → Investigate → Reason → Correct Path → Recover
+- What's already built vs what's new (pull from your Step 0 delta list —
+  this is the single most important section, don't bury it)
+- Explicit scope boundaries: what ships for the demo vs what's future work
+  (use the "Core build" / "Upgrade" / "Explicitly out of scope" framing —
+  be ruthless, this project has a tendency toward scope creep, name it)
+- Success criteria (tie to the metrics categories: security, agent
+  performance, human impact, safety — don't invent new ones)
+- One paragraph correcting any overclaims from the source docs (e.g. don't
+  claim "every existing phishing tool just blocks" — state the more
+  defensible, narrower claim instead)
+
+=====================================================================
+STEP 3 — WRITE THE SYSTEM DESIGN DOC (one doc — this is the binding contract)
+=====================================================================
+This is the document sub-PRD authors are NOT allowed to contradict. Include:
+
+1. **Glossary** — canonical name for every module, every data object, every
+   status/state value. This is the terminology lock. E.g. decide once:
+   "Investigation Agent" not "Browser Agent"; "Correct Path" not "safe
+   redirect"; "risk_level" enum values are exactly Low/Medium/High/Critical
+   (matching what already exists in the DB — do not invent a new enum).
+
+2. **Module map** — a diagram (mermaid) showing every component: existing
+   (Extension, FastAPI backend, LightGBM, Dashboard, SQLite) and new
+   (Investigation Browser, Trusted Reference Browser, Policy Engine,
+   Intent Inference, Trusted Source Registry, Evidence Fusion meta-model,
+   Recovery Workflow Engine). Draw a hard boundary line between "existing,
+   being modified" and "wholly new."
+
+3. **Data contracts** — for EVERY boundary crossing between modules, define
+   the exact schema (request/response JSON, or function signature) BEFORE
+   any sub-PRD gets written. At minimum:
+   - Extension → Backend: existing /api/v1/detect contract (document as-is)
+     PLUS new fields needed to trigger investigation (e.g. investigation_id,
+     status: pending/investigating/resolved)
+   - Backend → Investigation Agent: the investigation objective object
+     (target url, claimed_brand, objective steps, max_steps, max_time,
+     allowed_domains)
+   - Investigation Agent → Policy Engine: the action-proposal object
+     (action type, risk tier, parameters) and the policy decision object
+     (ALLOW/BLOCK/REQUIRE_APPROVAL + reason)
+   - Investigation Agent → Evidence Fusion: the evidence object schema
+     (each signal name, score, confidence)
+   - Evidence Fusion → Reasoner: the verdict object (verdict label,
+     probability, evidence list, explanation text)
+   - Reasoner → Intent Inference / Correct Path: what triggers Correct
+     Path lookup, and the confidence threshold for auto-redirect vs
+     asking the user
+   - Backend → Extension: how the "pending investigation" and final
+     verdict/redirect gets communicated back (polling? websocket? — pick
+     one, don't leave it open, note the existing 4-second polling pattern
+     already in service-worker.js as the fallback if you don't want to
+     introduce websockets)
+   - Recovery Workflow: input (what was exposed) → output (workflow steps)
+
+4. **Risk tier table** — lock down the 5 action-risk levels (Observation /
+   Reversible / Sensitive / External-side-effect / Financial-irreversible)
+   exactly as later described, with a canonical list of which concrete
+   actions fall in which tier. This becomes the contract the Policy Engine
+   PRD and Investigation Agent PRD both must obey.
+
+5. **State machine** — the investigation lifecycle
+   (OBSERVE→ASSESS→INVESTIGATE→COLLECT_EVIDENCE→VERIFY→DECIDE→RESPOND→
+   VERIFY_RESPONSE→COMPLETE, with REPLAN and HUMAN_REVIEW branches) as the
+   canonical states — every module that touches investigation status must
+   use these exact state names.
+
+6. **"Current vs Target State" section** — your Step 0 delta list, formatted
+   as a table: Capability | Status | Evidence (file/line if exists) |
+   Owning sub-PRD.
+
+=====================================================================
+STEP 4 — WRITE 8 SUB-PRDs (detailed, technical, one per sector)
+=====================================================================
+Each sub-PRD MUST open with a "Contracts consumed" and "Contracts produced"
+section that references the System Design doc by exact path/section — no
+sub-PRD is allowed to define its own version of a shared schema.
+
+1. **Detection & ML** — retrain plan, evidence-fusion meta-model (replacing
+   the current hand-tuned score blending in main.py), visual/logo similarity
+   (embedding + cosine similarity), what to do with the dead models
+   (model_enhanced.joblib etc — recommend deletion or actual integration,
+   don't leave them as debt), feature engineering additions if any.
+
+2. **Backend/API Core** — de-monolith plan for main.py (990 lines → modules),
+   the NEW routes needed for investigation trigger/poll/webhook, migration
+   plan for the two duplicate DBs, auth strategy (currently none).
+
+3. **Extension** — change from "detect→block" to "detect→trigger
+   investigation→show pending state→render verdict/Correct Path." UI states
+   needed in the popup/badge/blocked page for "investigating..." vs
+   "blocked" vs "redirected to real site."
+
+4. **Dashboard/UI** — replace/extend current KPI dashboard with an Incident
+   Investigation Console: live incident view, evidence graph, agent
+   activity trace (reference the existing dashboard route structure from
+   the codebase, don't propose a rebuild from scratch unless justified).
+
+5. **Investigation Agent** — Playwright-based browser automation, the
+   constrained tool interface (navigate/click/type/screenshot/inspect_dom/
+   extract_forms/etc — NOT arbitrary computer control), isolated context
+   management (no cookies/passwords/PII), the bounded investigation planner.
+
+6. **Policy Engine & Safety** — the deterministic layer between agent
+   decision and tool execution, risk-tier enforcement (consumes System
+   Design §4 table, does not redefine it), prompt-injection defense
+   (treat page content as UNTRUSTED_EXTERNAL_CONTENT, never as instructions).
+
+7. **Intent Inference & Correct Path** — intent extraction from
+   search/message context, confidence-gated redirection (high confidence =
+   auto-redirect, low confidence = ask the user, NEVER guess), the Trusted
+   Source Registry schema and seed list (20-50 orgs for the hackathon demo),
+   the trust hierarchy (curated registry > verified official source >
+   search-based discovery > LLM reasoning — LLM is never the root of trust).
+
+8. **Recovery Workflow** — structured (not LLM-improvised) recovery flows
+   for credential exposure vs payment exposure, guidance-only (no live
+   account actions), how it's triggered from a verdict.
+
+Each sub-PRD needs: scope (in/out), data model additions, API endpoints it
+owns, dependencies on other sub-PRDs (named explicitly, with the exact
+contract reference), a test/acceptance checklist, and a "what breaks if this
+contract changes" note.
+
+=====================================================================
+STEP 5 — EXISTING-CODE FIX LIST (prioritized, no edits — list only)
+=====================================================================
+Produce a separate prioritized list of concrete fixes needed in the CURRENT
+codebase before/alongside the new work, grouped:
+- Critical (security): unauthenticated /reset, open CORS, committed API key,
+  server binding to 0.0.0.0, no auth on any endpoint
+- Architecture debt: monolith main.py, duplicate DBs, dead code/dead models
+  to delete, triple-defined privacy settings endpoint, router layer that's
+  commented out
+- Functional bugs: stub /analyze endpoint, missing /temporal/analyze that
+  extension calls, port mismatch (8000 vs 8002), variable shadowing bug
+- Performance: sync Gemini calls blocking async loop, pandas imported
+  per-call, 4-second polling interval, content script scanning every link
+  on every page
+
+For each item: what it blocks (which sub-PRD can't safely build on top of it
+until fixed), and rough effort (S/M/L). Do NOT write the actual code fix —
+list and prioritize only, per instruction.
+
+=====================================================================
+STEP 6 — COORDINATION RULES & CHECKLIST (one doc)
+=====================================================================
+This is for the 6 humans, not the code. Include:
+
+**Contract-change protocol**: nobody edits a schema defined in System
+Design unilaterally. Change = PR against System Design doc first, tag the
+owners of every sub-PRD that consumes that contract, get explicit ack,
+THEN implement. State this as a hard rule, not a suggestion.
+
+**Definition of done per sub-PRD**: not "feature works" but "consumes
+contracts exactly as documented" + "produces contracts exactly as
+documented" + tests pass + no undocumented new shared fields introduced.
+
+**Merge/branch rule**: one branch per sub-PRD sector, no direct commits to
+main, PR must state which contracts (if any) it touches.
+
+**Weekly sync checklist**: each owner reports (a) any contract they wanted
+to change but didn't yet, (b) any contract from ANOTHER sub-PRD they had to
+work around because it was ambiguous — this surfaces contract gaps early.
+
+**Naming discipline**: reuse the System Design glossary. Reject any PR that
+introduces a new name for an existing concept.
+
+=====================================================================
+OUTPUT FORMAT
+=====================================================================
+Produce all documents as separate markdown files at the paths you declared
+in Step 1. Print a final summary table: file path | doc type | one-line
+purpose | depends on which other docs. Do not compress multiple doc types
+into one file even if short — the separation is intentional for parallel
+ownership.
