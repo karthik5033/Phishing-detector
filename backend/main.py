@@ -355,49 +355,44 @@ async def detect_phishing(request: Request, db: Session = Depends(get_db), servi
         }
 
     # 0.2 Check Built-in Whitelist (Common Benign Sites) - Sensitivity Fix
-    BENIGN_DOMAINS = {
-        "google.com", "youtube.com", "amazon.com", "wikipedia.org", 
-        "microsoft.com", "apple.com", "yahoo.com", "bing.com", "whatsapp.com", 
-        "ebay.com", "office.com", "github.com", "stackoverflow.com", "quora.com",
-        "paypal.com", "adobe.com", "cloudflare.com", "dropbox.com", "cnn.com", "bbc.co.uk",
-        "nytimes.com", "spotify.com", "walmart.com", "target.com",
+    # Use central TRUSTED_DOMAINS as the base and merge a few extra known benign domains
+    EXTRA_BENIGN = {
         "localhost", "127.0.0.1",
+        "cnn.com", "bbc.co.uk", "nytimes.com", "walmart.com", "target.com",
         # Explicitly Whitelisted based on User Feedback
-        "imdb.com", "linkedin.com", "indeed.com", "naukri.com", "glassdoor.com",
-        "gov.in", "nic.in", "org.in", "edu.in", # Whitelist Gov/Edu TLDs via parent logic
-        "x.com", "twitter.com", "facebook.com", "instagram.com", "reddit.com", "pinterest.com",
-        "netflix.com", "hulu.com", "disneyplus.com", "primevideo.com", "moviesanywhere.com", "hotstar.com",
-        # Additional Media / Streaming (verified legit)
+        "imdb.com", "indeed.com", "naukri.com", "glassdoor.com",
+        # Gov/Edu parent TLDs to allow through parent-domain check
+        "gov.in", "nic.in", "org.in", "edu.in",
+        # Additional Media / Streaming & miscellaneous
+        "hulu.com", "disneyplus.com", "primevideo.com", "moviesanywhere.com", "hotstar.com",
         "plex.tv", "hoopladigital.com", "screenrant.com", "dailymotion.com", "archive.org",
-        "moviesunlimited.com", "rottentomatoes.com", "manoramaonline.com", "zee5.com", "jiocinema.com",
-        "paytm.com", "bookmyshow.com",
+        "rottentomatoes.com", "manoramaonline.com", "zee5.com", "jiocinema.com",
+        "paytm.com", "bookmyshow.com", "tubi.tv", "tubitv.com", "justwatch.com",
+        "crunchyroll.com", "funimation.com", "uptodown.com", "apkmirror.com",
         # Dictionaries & Educational (Critical - Prevent False Positives)
-        "cambridge.org", "merriam-webster.com", "dictionary.com", "ldoceonline.com", 
+        "cambridge.org", "merriam-webster.com", "dictionary.com", "ldoceonline.com",
         "etymonline.com", "oxfordlearnersdictionaries.com", "thefreedictionary.com",
         # Tech & Entertainment News
         "tomsguide.com", "techradar.com", "cnet.com", "theverge.com",
-        # Indian OTT & Services
-        "airtelxstream.in", "sonyliv.com",
         # Gaming & Misc
         "steampowered.com", "store.steampowered.com", "chili.com",
-        # Additional Streaming & Media
-        "tubi.tv", "tubitv.com", "justwatch.com", "crunchyroll.com", "funimation.com",
-        "uptodown.com", "apkmirror.com"
     }
-    
+
+    BENIGN_DOMAINS = set(TRUSTED_DOMAINS) | EXTRA_BENIGN
+
     # Check if domain or parent domain is in whitelist
     parts = clean_domain.split('.')
     parent_domain = ".".join(parts[-2:]) if len(parts) > 1 else clean_domain
-    
+
     if clean_domain in BENIGN_DOMAINS or parent_domain in BENIGN_DOMAINS:
-          return {
-             "url": url,
-             "is_phishing": False,
-             "confidence_score": 0.00, # Force Safe
-             "max_risk_score": 0.0,
-             "risk_level": "Low",
-             "heuristics": {"note": "Verified Safe Domain"}
-         }
+        return {
+            "url": url,
+            "is_phishing": False,
+            "confidence_score": 0.00, # Force Safe
+            "max_risk_score": 0.0,
+            "risk_level": "Low",
+            "heuristics": {"note": "Verified Safe Domain"}
+        }
 
     # 0.2 Check Keyword Blacklist (Strict Policy: Adult, Piracy, Games, Crypto, Earning)
     STRICT_KEYWORDS = [
